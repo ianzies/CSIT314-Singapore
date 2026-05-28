@@ -5,7 +5,13 @@
 
 <p>Welcome, candidate.</p>
 
-<p>Your membership status will determine how many job recommendations you can access.</p>
+<p><strong>Membership:</strong> {{ session.get("membership_status")|replace("_", " ")|title }}</p>
+
+{% if session.get("membership_status") == "member" %}
+    <p>You have member access, so you can view all ranked job recommendations.</p>
+{% else %}
+    <p>You are using a non-member account, so job recommendations are limited to the top 10 matches.</p>
+{% endif %}
 
 <ul>
     <li><a href="{{ url_for('candidate_profile') }}">Create or edit your candidate profile</a></li>

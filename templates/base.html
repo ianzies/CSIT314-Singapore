@@ -18,6 +18,10 @@
             <a href="{{ url_for('company_profile') }}">Company Profile</a>
         {% endif %}
 
+        {% if session.get("membership_status") == "member" %}
+            <span class="member-badge">Member</span>
+        {% endif %}
+
         <a href="{{ url_for('logout') }}">Logout</a>
     {% else %}
         <a href="{{ url_for('register') }}">Register</a>
