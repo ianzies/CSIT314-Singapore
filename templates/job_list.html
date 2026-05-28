@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Available Job Postings</h2>
+
+<p>Browse job opportunities posted by employers.</p>
+
+{% if jobs %}
+    {% for job in jobs %}
+        <div class="job-card">
+            <h3>{{ job.job_title }}</h3>
+
+            <p><strong>Company:</strong> {{ job.company_name }}</p>
+            <p><strong>Location:</strong> {{ job.job_location }}</p>
+            <p><strong>Work Mode:</strong> {{ job.work_mode }}</p>
+            <p><strong>Job Type:</strong> {{ job.job_type }}</p>
+            <p><strong>Salary Range:</strong> {{ job.salary_range }}</p>
+            <p><strong>Required Education:</strong> {{ job.required_education }}</p>
+            <p><strong>Required Experience:</strong> {{ job.years_experience_required }} years</p>
+            <p><strong>Required Skills:</strong> {{ job.required_skills }}</p>
+
+            <p><strong>Description:</strong></p>
+            <p>{{ job.job_description }}</p>
+        </div>
+        <br>
+    {% endfor %}
+{% else %}
+    <p>No job postings are available yet.</p>
+{% endif %}
+{% endblock %}

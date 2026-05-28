@@ -272,6 +272,26 @@ def create_job():
     return render_template("job_form.html")
 
 
+# Job listing route for candidates
+@app.route("/jobs")
+def job_list():
+    if session.get("role") != "candidate":
+        return redirect(url_for("login"))
+
+    db = get_db()
+
+    jobs = db.execute(
+        """
+        SELECT jobs.*, companies.company_name
+        FROM jobs
+        JOIN companies ON jobs.company_id = companies.company_id
+        ORDER BY jobs.job_id DESC
+        """
+    ).fetchall()
+
+    return render_template("job_list.html", jobs=jobs)
+
+
 if __name__ == "__main__":
     if not os.path.exists(DATABASE):
         with app.app_context():
