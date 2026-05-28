@@ -12,8 +12,15 @@
     <label>Contact Information:</label><br>
     <input type="text" name="contact_info" value="{{ profile.contact_info if profile else '' }}"><br><br>
 
-    <label>Education:</label><br>
-    <input type="text" name="education" value="{{ profile.education if profile else '' }}"><br><br>
+    <label>Education Level:</label><br>
+    <select name="education" required>
+        <option value="">Select education level</option>
+        <option value="Diploma" {% if profile and profile.education == "Diploma" %}selected{% endif %}>Diploma</option>
+        <option value="Bachelor" {% if profile and profile.education == "Bachelor" %}selected{% endif %}>Bachelor</option>
+        <option value="Master" {% if profile and profile.education == "Master" %}selected{% endif %}>Master</option>
+        <option value="Doctorate" {% if profile and profile.education == "Doctorate" %}selected{% endif %}>Doctorate</option>
+        <option value="Other" {% if profile and profile.education == "Other" %}selected{% endif %}>Other</option>
+    </select><br><br>
 
     <label>Major / Field of Study:</label><br>
     <input type="text" name="major" value="{{ profile.major if profile else '' }}"><br><br>

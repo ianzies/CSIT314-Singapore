@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, session, url_for, g
 from werkzeug.security import generate_password_hash, check_password_hash
+from difflib import SequenceMatcher
 import sqlite3
 import os
 
@@ -39,6 +40,35 @@ def normalise_words(text):
     return set(cleaned_text.split())
 
 
+def fuzzy_score(a, b):
+    if not a or not b:
+        return 0
+
+    return SequenceMatcher(None, a.lower(), b.lower()).ratio()
+
+
+def fuzzy_contains(search_term, text, threshold=0.65):
+    if not search_term or not text:
+        return False
+
+    search_term = search_term.lower()
+    text = text.lower().replace(",", " ")
+
+    if search_term in text:
+        return True
+
+    words = text.split()
+
+    for word in words:
+        if search_term in word or word in search_term:
+            return True
+
+        if fuzzy_score(search_term, word) >= threshold:
+            return True
+
+    return False
+
+
 def calculate_job_match(candidate, job):
     score = 0
     reasons = []
@@ -63,12 +93,9 @@ def calculate_job_match(candidate, job):
         score += 15
         reasons.append("Preferred location matches the job location.")
 
-    candidate_major = (candidate["major"] or "").lower()
-    required_education = (job["required_education"] or "").lower()
-
-    if candidate_major and candidate_major in required_education:
+    if candidate["education"] == job["required_education"]:
         score += 15
-        reasons.append("Candidate major matches the required education field.")
+        reasons.append("Candidate education level matches the job education requirement.")
 
     candidate_experience = candidate["years_experience"] or 0
     required_experience = job["years_experience_required"] or 0
@@ -108,12 +135,9 @@ def calculate_candidate_match(candidate, job):
         score += 15
         reasons.append("Candidate preferred location matches the job location.")
 
-    candidate_major = (candidate["major"] or "").lower()
-    required_education = (job["required_education"] or "").lower()
-
-    if candidate_major and candidate_major in required_education:
+    if candidate["education"] == job["required_education"]:
         score += 15
-        reasons.append("Candidate major matches the job education requirement.")
+        reasons.append("Candidate education level matches the job education requirement.")
 
     candidate_experience = candidate["years_experience"] or 0
     required_experience = job["years_experience_required"] or 0
@@ -135,6 +159,12 @@ def index():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    if "user_id" in session:
+        if session.get("role") == "candidate":
+            return redirect(url_for("candidate_dashboard"))
+        elif session.get("role") == "employer":
+            return redirect(url_for("employer_dashboard"))
+
     if request.method == "POST":
         email = request.form["email"]
         password = request.form["password"]
@@ -164,6 +194,12 @@ def register():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    if "user_id" in session:
+        if session.get("role") == "candidate":
+            return redirect(url_for("candidate_dashboard"))
+        elif session.get("role") == "employer":
+            return redirect(url_for("employer_dashboard"))
+
     if request.method == "POST":
         email = request.form["email"]
         password = request.form["password"]
@@ -384,7 +420,8 @@ def job_list():
     job_type = request.args.get("job_type", "").strip()
 
     query = """
-        SELECT jobs.*, companies.company_name
+        SELECT jobs.*, companies.company_name, companies.company_description,
+               companies.industry, companies.location AS company_location
         FROM jobs
         JOIN companies ON jobs.company_id = companies.company_id
         WHERE 1 = 1
@@ -397,15 +434,28 @@ def job_list():
                 jobs.job_title LIKE ?
                 OR jobs.job_description LIKE ?
                 OR jobs.required_skills LIKE ?
+                OR jobs.required_education LIKE ?
+                OR jobs.salary_range LIKE ?
                 OR companies.company_name LIKE ?
+                OR companies.company_description LIKE ?
+                OR companies.industry LIKE ?
             )
         """
         keyword_search = f"%{keyword}%"
-        params.extend([keyword_search, keyword_search, keyword_search, keyword_search])
+        params.extend([
+            keyword_search,
+            keyword_search,
+            keyword_search,
+            keyword_search,
+            keyword_search,
+            keyword_search,
+            keyword_search,
+            keyword_search
+        ])
 
     if location:
-        query += " AND jobs.job_location LIKE ?"
-        params.append(f"%{location}%")
+        query += " AND (jobs.job_location LIKE ? OR companies.location LIKE ?)"
+        params.extend([f"%{location}%", f"%{location}%"])
 
     if work_mode:
         query += " AND jobs.work_mode = ?"
@@ -418,6 +468,40 @@ def job_list():
     query += " ORDER BY jobs.job_id DESC"
 
     jobs = db.execute(query, params).fetchall()
+
+    if keyword and not jobs:
+        all_jobs = db.execute(
+            """
+            SELECT jobs.*, companies.company_name, companies.company_description,
+                   companies.industry, companies.location AS company_location
+            FROM jobs
+            JOIN companies ON jobs.company_id = companies.company_id
+            ORDER BY jobs.job_id DESC
+            """
+        ).fetchall()
+
+        fuzzy_jobs = []
+
+        for job in all_jobs:
+            searchable_text = " ".join([
+                job["job_title"] or "",
+                job["job_description"] or "",
+                job["required_skills"] or "",
+                job["required_education"] or "",
+                job["salary_range"] or "",
+                job["job_location"] or "",
+                job["work_mode"] or "",
+                job["job_type"] or "",
+                job["company_name"] or "",
+                job["company_description"] or "",
+                job["industry"] or "",
+                job["company_location"] or ""
+            ])
+
+            if fuzzy_contains(keyword, searchable_text):
+                fuzzy_jobs.append(job)
+
+        jobs = fuzzy_jobs
 
     return render_template(
         "job_list.html",
@@ -438,58 +522,75 @@ def candidate_list():
     db = get_db()
 
     keyword = request.args.get("keyword", "").strip()
+    skill = request.args.get("skill", "").strip()
+    education = request.args.get("education", "").strip()
     major = request.args.get("major", "").strip()
+    min_experience = request.args.get("min_experience", "").strip()
     preferred_location = request.args.get("preferred_location", "").strip()
     preferred_work_mode = request.args.get("preferred_work_mode", "").strip()
 
-    query = """
+    candidates = db.execute(
+        """
         SELECT candidates.*, users.email
         FROM candidates
         JOIN users ON candidates.user_id = users.user_id
-        WHERE 1 = 1
-    """
-    params = []
-
-    if keyword:
-        query += """
-            AND (
-                candidates.full_name LIKE ?
-                OR candidates.education LIKE ?
-                OR candidates.work_experience LIKE ?
-                OR candidates.skills LIKE ?
-                OR users.email LIKE ?
-            )
+        ORDER BY candidates.candidate_id DESC
         """
-        keyword_search = f"%{keyword}%"
-        params.extend([
-            keyword_search,
-            keyword_search,
-            keyword_search,
-            keyword_search,
-            keyword_search
+    ).fetchall()
+
+    filtered_candidates = []
+
+    for candidate in candidates:
+        searchable_text = " ".join([
+            candidate["full_name"] or "",
+            candidate["email"] or "",
+            candidate["education"] or "",
+            candidate["major"] or "",
+            candidate["work_experience"] or "",
+            candidate["skills"] or "",
+            candidate["preferred_location"] or "",
+            candidate["preferred_work_mode"] or ""
         ])
 
-    if major:
-        query += " AND candidates.major LIKE ?"
-        params.append(f"%{major}%")
+        if keyword and not fuzzy_contains(keyword, searchable_text):
+            continue
 
-    if preferred_location:
-        query += " AND candidates.preferred_location LIKE ?"
-        params.append(f"%{preferred_location}%")
+        if skill and not fuzzy_contains(skill, candidate["skills"]):
+            continue
 
-    if preferred_work_mode:
-        query += " AND candidates.preferred_work_mode = ?"
-        params.append(preferred_work_mode)
+        if education and candidate["education"] != education:
+            continue
 
-    query += " ORDER BY candidates.candidate_id DESC"
+        if major and not fuzzy_contains(major, candidate["major"]):
+            continue
 
-    candidates = db.execute(query, params).fetchall()
+        if min_experience:
+            try:
+                minimum_years = int(min_experience)
+            except ValueError:
+                minimum_years = 0
+
+            candidate_years = candidate["years_experience"] or 0
+
+            if candidate_years < minimum_years:
+                continue
+
+        if preferred_location and not fuzzy_contains(preferred_location, candidate["preferred_location"]):
+            continue
+
+        if preferred_work_mode and candidate["preferred_work_mode"] != preferred_work_mode:
+            continue
+
+        filtered_candidates.append(candidate)
 
     return render_template(
         "candidate_list.html",
-        candidates=candidates,
+        candidates=filtered_candidates,
         keyword=keyword,
+        skill=skill,
+        education=education,
         major=major,
+        min_experience=min_experience,
         preferred_location=preferred_location,
         preferred_work_mode=preferred_work_mode
     )

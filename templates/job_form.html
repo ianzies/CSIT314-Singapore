@@ -12,8 +12,15 @@
     <label>Job Description:</label><br>
     <textarea name="job_description" rows="4"></textarea><br><br>
 
-    <label>Required Education:</label><br>
-    <input type="text" name="required_education"><br><br>
+    <label>Required Education Level:</label><br>
+    <select name="required_education" required>
+        <option value="">Select required education level</option>
+        <option value="Diploma">Diploma</option>
+        <option value="Bachelor">Bachelor</option>
+        <option value="Master">Master</option>
+        <option value="Doctorate">Doctorate</option>
+        <option value="Other">Other</option>
+    </select><br><br>
 
     <label>Required Skills:</label><br>
     <textarea name="required_skills" rows="4" placeholder="Example: Python, SQL, machine learning"></textarea><br><br>

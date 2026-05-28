@@ -7,10 +7,26 @@
 
 <form method="GET" action="{{ url_for('candidate_list') }}">
     <label>Keyword:</label><br>
-    <input type="text" name="keyword" placeholder="Search name, skills, education, or experience" value="{{ keyword }}"><br><br>
+    <input type="text" name="keyword" placeholder="Broad search across candidate profile" value="{{ keyword }}"><br><br>
+
+    <label>Skill:</label><br>
+    <input type="text" name="skill" placeholder="Example: Python" value="{{ skill }}"><br><br>
+
+    <label>Education Level:</label><br>
+    <select name="education">
+        <option value="">Any</option>
+        <option value="Diploma" {% if education == "Diploma" %}selected{% endif %}>Diploma</option>
+        <option value="Bachelor" {% if education == "Bachelor" %}selected{% endif %}>Bachelor</option>
+        <option value="Master" {% if education == "Master" %}selected{% endif %}>Master</option>
+        <option value="Doctorate" {% if education == "Doctorate" %}selected{% endif %}>Doctorate</option>
+        <option value="Other" {% if education == "Other" %}selected{% endif %}>Other</option>
+    </select><br><br>
 
     <label>Major:</label><br>
     <input type="text" name="major" placeholder="Example: Computer Science" value="{{ major }}"><br><br>
+
+    <label>Minimum Years of Experience:</label><br>
+    <input type="number" name="min_experience" min="0" placeholder="Example: 2" value="{{ min_experience }}"><br><br>
 
     <label>Preferred Location:</label><br>
     <input type="text" name="preferred_location" placeholder="Example: Sydney" value="{{ preferred_location }}"><br><br>
@@ -32,7 +48,7 @@
             <h3>{{ candidate.full_name }}</h3>
 
             <p><strong>Contact:</strong> {{ candidate.contact_info }}</p>
-            <p><strong>Education:</strong> {{ candidate.education }}</p>
+            <p><strong>Education Level:</strong> {{ candidate.education }}</p>
             <p><strong>Major:</strong> {{ candidate.major }}</p>
             <p><strong>Years of Experience:</strong> {{ candidate.years_experience }}</p>
             <p><strong>Skills:</strong> {{ candidate.skills }}</p>

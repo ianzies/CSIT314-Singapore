@@ -8,9 +8,21 @@
 
 <nav>
     <a href="{{ url_for('index') }}">Home</a>
-    <a href="{{ url_for('register') }}">Register</a>
-    <a href="{{ url_for('login') }}">Login</a>
-    <a href="{{ url_for('logout') }}">Logout</a>
+
+    {% if session.get("user_id") %}
+        {% if session.get("role") == "candidate" %}
+            <a href="{{ url_for('candidate_dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('candidate_profile') }}">Profile</a>
+        {% elif session.get("role") == "employer" %}
+            <a href="{{ url_for('employer_dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('company_profile') }}">Company Profile</a>
+        {% endif %}
+
+        <a href="{{ url_for('logout') }}">Logout</a>
+    {% else %}
+        <a href="{{ url_for('register') }}">Register</a>
+        <a href="{{ url_for('login') }}">Login</a>
+    {% endif %}
 </nav>
 
 <hr>
