@@ -83,6 +83,51 @@ def calculate_job_match(candidate, job):
     return min(score, 100), reasons
 
 
+# Helper function to match a candidate to a job (for employer view)
+def calculate_candidate_match(candidate, job):
+    score = 0
+    reasons = []
+
+    candidate_skills = normalise_words(candidate["skills"])
+    job_skills = normalise_words(job["required_skills"])
+
+    matching_skills = candidate_skills.intersection(job_skills)
+
+    if matching_skills:
+        score += 40
+        reasons.append("Skills match: " + ", ".join(sorted(matching_skills)))
+
+    if candidate["preferred_work_mode"] == job["work_mode"]:
+        score += 20
+        reasons.append("Candidate preferred work mode matches the job work mode.")
+
+    candidate_location = (candidate["preferred_location"] or "").lower()
+    job_location = (job["job_location"] or "").lower()
+
+    if candidate_location and candidate_location in job_location:
+        score += 15
+        reasons.append("Candidate preferred location matches the job location.")
+
+    candidate_major = (candidate["major"] or "").lower()
+    required_education = (job["required_education"] or "").lower()
+
+    if candidate_major and candidate_major in required_education:
+        score += 15
+        reasons.append("Candidate major matches the job education requirement.")
+
+    candidate_experience = candidate["years_experience"] or 0
+    required_experience = job["years_experience_required"] or 0
+
+    if candidate_experience >= required_experience:
+        score += 10
+        reasons.append("Candidate experience meets or exceeds the job requirement.")
+
+    if not reasons:
+        reasons.append("This candidate has limited direct matches, but may still be worth reviewing.")
+
+    return min(score, 100), reasons
+
+
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -492,6 +537,68 @@ def recommended_jobs():
 
     return render_template("recommended_jobs.html", recommendations=recommendations)
 
+# Recommended candidates route for employers
+@app.route("/candidates/recommended")
+def recommended_candidates():
+    if session.get("role") != "employer":
+        return redirect(url_for("login"))
+
+    db = get_db()
+    user_id = session["user_id"]
+
+    company = db.execute(
+        "SELECT * FROM companies WHERE user_id = ?",
+        (user_id,)
+    ).fetchone()
+
+    if company is None:
+        return "Please create a company profile before viewing recommended candidates."
+
+    jobs = db.execute(
+        "SELECT * FROM jobs WHERE company_id = ?",
+        (company["company_id"],)
+    ).fetchall()
+
+    if not jobs:
+        return "Please create at least one job posting before viewing recommended candidates."
+
+    candidates = db.execute(
+        """
+        SELECT candidates.*, users.email
+        FROM candidates
+        JOIN users ON candidates.user_id = users.user_id
+        """
+    ).fetchall()
+
+    recommendations = []
+
+    for candidate in candidates:
+        best_score = 0
+        best_reasons = []
+        best_job = None
+
+        for job in jobs:
+            score, reasons = calculate_candidate_match(candidate, job)
+
+            if score > best_score:
+                best_score = score
+                best_reasons = reasons
+                best_job = job
+
+        if best_job is not None:
+            recommendations.append({
+                "candidate": candidate,
+                "job": best_job,
+                "score": best_score,
+                "reasons": best_reasons
+            })
+
+    recommendations.sort(key=lambda item: item["score"], reverse=True)
+
+    if session.get("membership_status") != "member":
+        recommendations = recommendations[:10]
+
+    return render_template("recommended_candidates.html", recommendations=recommendations)
 
 if __name__ == "__main__":
     if not os.path.exists(DATABASE):

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Recommended Candidates</h2>
+
+<p>Candidates are ranked based on how closely they match your posted jobs.</p>
+
+{% if recommendations %}
+    {% for item in recommendations %}
+        <div class="candidate-card">
+            <h3>{{ item.candidate.full_name }}</h3>
+
+            <p><strong>Best Match For:</strong> {{ item.job.job_title }}</p>
+            <p><strong>Match Score:</strong> {{ item.score }}%</p>
+            <p><strong>Contact:</strong> {{ item.candidate.contact_info }}</p>
+            <p><strong>Email:</strong> {{ item.candidate.email }}</p>
+            <p><strong>Education:</strong> {{ item.candidate.education }}</p>
+            <p><strong>Major:</strong> {{ item.candidate.major }}</p>
+            <p><strong>Years of Experience:</strong> {{ item.candidate.years_experience }}</p>
+            <p><strong>Skills:</strong> {{ item.candidate.skills }}</p>
+            <p><strong>Preferred Work Mode:</strong> {{ item.candidate.preferred_work_mode }}</p>
+            <p><strong>Preferred Location:</strong> {{ item.candidate.preferred_location }}</p>
+
+            <p><strong>Work Experience:</strong></p>
+            <p>{{ item.candidate.work_experience }}</p>
+
+            <p><strong>Why this candidate was recommended:</strong></p>
+            <ul>
+                {% for reason in item.reasons %}
+                    <li>{{ reason }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <br>
+    {% endfor %}
+{% else %}
+    <p>No candidate recommendations available yet. Make sure candidates have created profiles and your company has posted jobs.</p>
+{% endif %}
+{% endblock %}
