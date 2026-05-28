@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Create Job Posting</h2>
+
+<p>Enter job details so candidates can search and match with this role.</p>
+
+<form method="POST">
+    <label>Job Title:</label><br>
+    <input type="text" name="job_title" required><br><br>
+
+    <label>Job Description:</label><br>
+    <textarea name="job_description" rows="4"></textarea><br><br>
+
+    <label>Required Education:</label><br>
+    <input type="text" name="required_education"><br><br>
+
+    <label>Required Skills:</label><br>
+    <textarea name="required_skills" rows="4" placeholder="Example: Python, SQL, machine learning"></textarea><br><br>
+
+    <label>Years of Experience Required:</label><br>
+    <input type="number" name="years_experience_required" min="0" value="0"><br><br>
+
+    <label>Work Mode:</label><br>
+    <select name="work_mode">
+        <option value="Remote">Remote</option>
+        <option value="Hybrid">Hybrid</option>
+        <option value="On-site">On-site</option>
+    </select><br><br>
+
+    <label>Job Location:</label><br>
+    <input type="text" name="job_location"><br><br>
+
+    <label>Salary Range:</label><br>
+    <input type="text" name="salary_range" placeholder="Example: $70,000 - $90,000"><br><br>
+
+    <label>Job Type:</label><br>
+    <select name="job_type">
+        <option value="Full-time">Full-time</option>
+        <option value="Part-time">Part-time</option>
+        <option value="Internship">Internship</option>
+        <option value="Contract">Contract</option>
+    </select><br><br>
+
+    <button type="submit">Create Job Posting</button>
+</form>
+{% endblock %}

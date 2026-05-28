@@ -222,6 +222,56 @@ def company_profile():
     return render_template("company_profile.html", company=company)
 
 
+# Job creation route
+@app.route("/jobs/create", methods=["GET", "POST"])
+def create_job():
+    if session.get("role") != "employer":
+        return redirect(url_for("login"))
+
+    db = get_db()
+    user_id = session["user_id"]
+
+    company = db.execute(
+        "SELECT * FROM companies WHERE user_id = ?",
+        (user_id,)
+    ).fetchone()
+
+    if company is None:
+        return "Please create a company profile before posting jobs."
+
+    if request.method == "POST":
+        job_title = request.form["job_title"]
+        job_description = request.form["job_description"]
+        required_education = request.form["required_education"]
+        required_skills = request.form["required_skills"]
+        years_experience_required = request.form["years_experience_required"]
+        work_mode = request.form["work_mode"]
+        job_location = request.form["job_location"]
+        salary_range = request.form["salary_range"]
+        job_type = request.form["job_type"]
+
+        db.execute(
+            """
+            INSERT INTO jobs (
+                company_id, job_title, job_description, required_education,
+                required_skills, years_experience_required, work_mode,
+                job_location, salary_range, job_type
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                company["company_id"], job_title, job_description,
+                required_education, required_skills, years_experience_required,
+                work_mode, job_location, salary_range, job_type
+            )
+        )
+
+        db.commit()
+        return redirect(url_for("employer_dashboard"))
+
+    return render_template("job_form.html")
+
+
 if __name__ == "__main__":
     if not os.path.exists(DATABASE):
         with app.app_context():
