@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Register</h2>
+
+<form method="POST">
+    <label>Email:</label><br>
+    <input type="email" name="email" required><br><br>
+
+    <label>Password:</label><br>
+    <input type="password" name="password" required><br><br>
+
+    <label>Role:</label><br>
+    <select name="role" required>
+        <option value="candidate">Candidate</option>
+        <option value="employer">Employer</option>
+    </select><br><br>
+
+    <label>Membership:</label><br>
+    <select name="membership_status" required>
+        <option value="non_member">Non-member</option>
+        <option value="member">Member</option>
+    </select><br><br>
+
+    <button type="submit">Register</button>
+</form>
+{% endblock %}
