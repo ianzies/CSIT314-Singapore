@@ -5,6 +5,33 @@
 
 <p>Browse job opportunities posted by employers.</p>
 
+<form method="GET" action="{{ url_for('job_list') }}">
+    <label>Keyword:</label><br>
+    <input type="text" name="keyword" placeholder="Search title, skills, or company" value="{{ keyword }}"><br><br>
+
+    <label>Location:</label><br>
+    <input type="text" name="location" placeholder="Example: Sydney" value="{{ location }}"><br><br>
+
+    <label>Work Mode:</label><br>
+    <select name="work_mode">
+        <option value="">Any</option>
+        <option value="Remote" {% if work_mode == "Remote" %}selected{% endif %}>Remote</option>
+        <option value="Hybrid" {% if work_mode == "Hybrid" %}selected{% endif %}>Hybrid</option>
+        <option value="On-site" {% if work_mode == "On-site" %}selected{% endif %}>On-site</option>
+    </select><br><br>
+
+    <label>Job Type:</label><br>
+    <select name="job_type">
+        <option value="">Any</option>
+        <option value="Full-time" {% if job_type == "Full-time" %}selected{% endif %}>Full-time</option>
+        <option value="Part-time" {% if job_type == "Part-time" %}selected{% endif %}>Part-time</option>
+        <option value="Internship" {% if job_type == "Internship" %}selected{% endif %}>Internship</option>
+        <option value="Contract" {% if job_type == "Contract" %}selected{% endif %}>Contract</option>
+    </select><br><br>
+
+    <button type="submit">Search Jobs</button>
+</form>
+
 {% if jobs %}
     {% for job in jobs %}
         <div class="job-card">

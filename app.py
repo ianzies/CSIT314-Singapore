@@ -280,16 +280,55 @@ def job_list():
 
     db = get_db()
 
-    jobs = db.execute(
-        """
+    keyword = request.args.get("keyword", "").strip()
+    location = request.args.get("location", "").strip()
+    work_mode = request.args.get("work_mode", "").strip()
+    job_type = request.args.get("job_type", "").strip()
+
+    query = """
         SELECT jobs.*, companies.company_name
         FROM jobs
         JOIN companies ON jobs.company_id = companies.company_id
-        ORDER BY jobs.job_id DESC
-        """
-    ).fetchall()
+        WHERE 1 = 1
+    """
+    params = []
 
-    return render_template("job_list.html", jobs=jobs)
+    if keyword:
+        query += """
+            AND (
+                jobs.job_title LIKE ?
+                OR jobs.job_description LIKE ?
+                OR jobs.required_skills LIKE ?
+                OR companies.company_name LIKE ?
+            )
+        """
+        keyword_search = f"%{keyword}%"
+        params.extend([keyword_search, keyword_search, keyword_search, keyword_search])
+
+    if location:
+        query += " AND jobs.job_location LIKE ?"
+        params.append(f"%{location}%")
+
+    if work_mode:
+        query += " AND jobs.work_mode = ?"
+        params.append(work_mode)
+
+    if job_type:
+        query += " AND jobs.job_type = ?"
+        params.append(job_type)
+
+    query += " ORDER BY jobs.job_id DESC"
+
+    jobs = db.execute(query, params).fetchall()
+
+    return render_template(
+        "job_list.html",
+        jobs=jobs,
+        keyword=keyword,
+        location=location,
+        work_mode=work_mode,
+        job_type=job_type
+    )
 
 
 if __name__ == "__main__":
