@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Company Profile</h2>
+
+<p>Enter your company details so candidates can understand your organisation.</p>
+
+<form method="POST">
+    <label>Company Name:</label><br>
+    <input type="text" name="company_name" value="{{ company.company_name if company else '' }}" required><br><br>
+
+    <label>Company Description:</label><br>
+    <textarea name="company_description" rows="4">{{ company.company_description if company else '' }}</textarea><br><br>
+
+    <label>Industry:</label><br>
+    <input type="text" name="industry" value="{{ company.industry if company else '' }}"><br><br>
+
+    <label>Location:</label><br>
+    <input type="text" name="location" value="{{ company.location if company else '' }}"><br><br>
+
+    <button type="submit">Save Company Profile</button>
+</form>
+{% endblock %}

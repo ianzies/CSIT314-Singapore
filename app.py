@@ -176,6 +176,52 @@ def employer_dashboard():
     return render_template("employer_dashboard.html")
 
 
+# Company profile route
+@app.route("/company/profile", methods=["GET", "POST"])
+def company_profile():
+    if session.get("role") != "employer":
+        return redirect(url_for("login"))
+
+    db = get_db()
+    user_id = session["user_id"]
+
+    company = db.execute(
+        "SELECT * FROM companies WHERE user_id = ?",
+        (user_id,)
+    ).fetchone()
+
+    if request.method == "POST":
+        company_name = request.form["company_name"]
+        company_description = request.form["company_description"]
+        industry = request.form["industry"]
+        location = request.form["location"]
+
+        if company:
+            db.execute(
+                """
+                UPDATE companies
+                SET company_name = ?, company_description = ?, industry = ?, location = ?
+                WHERE user_id = ?
+                """,
+                (company_name, company_description, industry, location, user_id)
+            )
+        else:
+            db.execute(
+                """
+                INSERT INTO companies (
+                    user_id, company_name, company_description, industry, location
+                )
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (user_id, company_name, company_description, industry, location)
+            )
+
+        db.commit()
+        return redirect(url_for("employer_dashboard"))
+
+    return render_template("company_profile.html", company=company)
+
+
 if __name__ == "__main__":
     if not os.path.exists(DATABASE):
         with app.app_context():
