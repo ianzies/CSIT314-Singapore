@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Candidate Search</h2>
+
+<p>Browse candidate profiles and search for suitable applicants.</p>
+
+<form method="GET" action="{{ url_for('candidate_list') }}">
+    <label>Keyword:</label><br>
+    <input type="text" name="keyword" placeholder="Search name, skills, education, or experience" value="{{ keyword }}"><br><br>
+
+    <label>Major:</label><br>
+    <input type="text" name="major" placeholder="Example: Computer Science" value="{{ major }}"><br><br>
+
+    <label>Preferred Location:</label><br>
+    <input type="text" name="preferred_location" placeholder="Example: Sydney" value="{{ preferred_location }}"><br><br>
+
+    <label>Preferred Work Mode:</label><br>
+    <select name="preferred_work_mode">
+        <option value="">Any</option>
+        <option value="Remote" {% if preferred_work_mode == "Remote" %}selected{% endif %}>Remote</option>
+        <option value="Hybrid" {% if preferred_work_mode == "Hybrid" %}selected{% endif %}>Hybrid</option>
+        <option value="On-site" {% if preferred_work_mode == "On-site" %}selected{% endif %}>On-site</option>
+    </select><br><br>
+
+    <button type="submit">Search Candidates</button>
+</form>
+
+{% if candidates %}
+    {% for candidate in candidates %}
+        <div class="candidate-card">
+            <h3>{{ candidate.full_name }}</h3>
+
+            <p><strong>Contact:</strong> {{ candidate.contact_info }}</p>
+            <p><strong>Education:</strong> {{ candidate.education }}</p>
+            <p><strong>Major:</strong> {{ candidate.major }}</p>
+            <p><strong>Years of Experience:</strong> {{ candidate.years_experience }}</p>
+            <p><strong>Skills:</strong> {{ candidate.skills }}</p>
+            <p><strong>Preferred Work Mode:</strong> {{ candidate.preferred_work_mode }}</p>
+            <p><strong>Preferred Location:</strong> {{ candidate.preferred_location }}</p>
+
+            <p><strong>Work Experience:</strong></p>
+            <p>{{ candidate.work_experience }}</p>
+        </div>
+        <br>
+    {% endfor %}
+{% else %}
+    <p>No candidate profiles match your search.</p>
+{% endif %}
+{% endblock %}

@@ -331,6 +331,72 @@ def job_list():
     )
 
 
+# Candidate listing route for employers
+@app.route("/candidates")
+def candidate_list():
+    if session.get("role") != "employer":
+        return redirect(url_for("login"))
+
+    db = get_db()
+
+    keyword = request.args.get("keyword", "").strip()
+    major = request.args.get("major", "").strip()
+    preferred_location = request.args.get("preferred_location", "").strip()
+    preferred_work_mode = request.args.get("preferred_work_mode", "").strip()
+
+    query = """
+        SELECT candidates.*, users.email
+        FROM candidates
+        JOIN users ON candidates.user_id = users.user_id
+        WHERE 1 = 1
+    """
+    params = []
+
+    if keyword:
+        query += """
+            AND (
+                candidates.full_name LIKE ?
+                OR candidates.education LIKE ?
+                OR candidates.work_experience LIKE ?
+                OR candidates.skills LIKE ?
+                OR users.email LIKE ?
+            )
+        """
+        keyword_search = f"%{keyword}%"
+        params.extend([
+            keyword_search,
+            keyword_search,
+            keyword_search,
+            keyword_search,
+            keyword_search
+        ])
+
+    if major:
+        query += " AND candidates.major LIKE ?"
+        params.append(f"%{major}%")
+
+    if preferred_location:
+        query += " AND candidates.preferred_location LIKE ?"
+        params.append(f"%{preferred_location}%")
+
+    if preferred_work_mode:
+        query += " AND candidates.preferred_work_mode = ?"
+        params.append(preferred_work_mode)
+
+    query += " ORDER BY candidates.candidate_id DESC"
+
+    candidates = db.execute(query, params).fetchall()
+
+    return render_template(
+        "candidate_list.html",
+        candidates=candidates,
+        keyword=keyword,
+        major=major,
+        preferred_location=preferred_location,
+        preferred_work_mode=preferred_work_mode
+    )
+
+
 if __name__ == "__main__":
     if not os.path.exists(DATABASE):
         with app.app_context():
