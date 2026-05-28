@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Candidate Profile</h2>
+
+<p>Enter your profile details so employers can find and match with you.</p>
+
+<form method="POST">
+    <label>Full Name:</label><br>
+    <input type="text" name="full_name" value="{{ profile.full_name if profile else '' }}" required><br><br>
+
+    <label>Contact Information:</label><br>
+    <input type="text" name="contact_info" value="{{ profile.contact_info if profile else '' }}"><br><br>
+
+    <label>Education:</label><br>
+    <input type="text" name="education" value="{{ profile.education if profile else '' }}"><br><br>
+
+    <label>Major / Field of Study:</label><br>
+    <input type="text" name="major" value="{{ profile.major if profile else '' }}"><br><br>
+
+    <label>Years of Experience:</label><br>
+    <input type="number" name="years_experience" min="0" value="{{ profile.years_experience if profile else 0 }}"><br><br>
+
+    <label>Work Experience:</label><br>
+    <textarea name="work_experience" rows="4">{{ profile.work_experience if profile else '' }}</textarea><br><br>
+
+    <label>Skills:</label><br>
+    <textarea name="skills" rows="4" placeholder="Example: Python, SQL, cybersecurity, communication">{{ profile.skills if profile else '' }}</textarea><br><br>
+
+    <label>Preferred Working Mode:</label><br>
+    <select name="preferred_work_mode">
+        <option value="Remote" {% if profile and profile.preferred_work_mode == "Remote" %}selected{% endif %}>Remote</option>
+        <option value="Hybrid" {% if profile and profile.preferred_work_mode == "Hybrid" %}selected{% endif %}>Hybrid</option>
+        <option value="On-site" {% if profile and profile.preferred_work_mode == "On-site" %}selected{% endif %}>On-site</option>
+    </select><br><br>
+
+    <label>Preferred Location:</label><br>
+    <input type="text" name="preferred_location" value="{{ profile.preferred_location if profile else '' }}"><br><br>
+
+    <button type="submit">Save Profile</button>
+</form>
+{% endblock %}

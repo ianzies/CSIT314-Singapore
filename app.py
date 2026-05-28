@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, session, url_for, g
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
+import os
 
 app = Flask(__name__)
 app.secret_key = "replace-this-with-a-secret-key"
@@ -104,6 +105,69 @@ def candidate_dashboard():
     return render_template("candidate_dashboard.html")
 
 
+# Candidate profile route
+@app.route("/candidate/profile", methods=["GET", "POST"])
+def candidate_profile():
+    if session.get("role") != "candidate":
+        return redirect(url_for("login"))
+
+    db = get_db()
+    user_id = session["user_id"]
+
+    profile = db.execute(
+        "SELECT * FROM candidates WHERE user_id = ?",
+        (user_id,)
+    ).fetchone()
+
+    if request.method == "POST":
+        full_name = request.form["full_name"]
+        contact_info = request.form["contact_info"]
+        education = request.form["education"]
+        major = request.form["major"]
+        years_experience = request.form["years_experience"]
+        work_experience = request.form["work_experience"]
+        skills = request.form["skills"]
+        preferred_work_mode = request.form["preferred_work_mode"]
+        preferred_location = request.form["preferred_location"]
+
+        if profile:
+            db.execute(
+                """
+                UPDATE candidates
+                SET full_name = ?, contact_info = ?, education = ?, major = ?,
+                    years_experience = ?, work_experience = ?, skills = ?,
+                    preferred_work_mode = ?, preferred_location = ?
+                WHERE user_id = ?
+                """,
+                (
+                    full_name, contact_info, education, major,
+                    years_experience, work_experience, skills,
+                    preferred_work_mode, preferred_location, user_id
+                )
+            )
+        else:
+            db.execute(
+                """
+                INSERT INTO candidates (
+                    user_id, full_name, contact_info, education, major,
+                    years_experience, work_experience, skills,
+                    preferred_work_mode, preferred_location
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    user_id, full_name, contact_info, education, major,
+                    years_experience, work_experience, skills,
+                    preferred_work_mode, preferred_location
+                )
+            )
+
+        db.commit()
+        return redirect(url_for("candidate_dashboard"))
+
+    return render_template("candidate_profile.html", profile=profile)
+
+
 @app.route("/employer/dashboard")
 def employer_dashboard():
     if session.get("role") != "employer":
@@ -113,6 +177,7 @@ def employer_dashboard():
 
 
 if __name__ == "__main__":
-    with app.app_context():
-        init_db()
+    if not os.path.exists(DATABASE):
+        with app.app_context():
+            init_db()
     app.run(debug=True)
