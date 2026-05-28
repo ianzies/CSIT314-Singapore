@@ -22,3 +22,23 @@ cd CSIT314-Singapore
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+```
+
+## Current Features
+
+- Flask web application structure created
+- SQLite database schema created
+- User registration implemented
+- User login implemented
+- Password hashing using Werkzeug
+- Candidate and employer role selection
+- Role-based dashboard redirection
+- Candidate dashboard created
+- Employer dashboard created
+- Logout functionality implemented
+
+## Development Status
+
+Sprint 1 foundation is complete. The current version supports basic registration, login, logout, and role-based dashboards for candidates and employers.
+
+Next development stage: candidate and employer profile creation.
