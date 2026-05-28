@@ -5,41 +5,55 @@
 
 <p>Browse candidate profiles and search for suitable applicants.</p>
 
-<form method="GET" action="{{ url_for('candidate_list') }}">
-    <label>Keyword:</label><br>
-    <input type="text" name="keyword" placeholder="Broad search across candidate profile" value="{{ keyword }}"><br><br>
+<form class="search-form" method="GET" action="{{ url_for('candidate_list') }}">
+    <div class="form-group full-width main-search-field">
+        <label>Keyword:</label>
+        <input type="text" name="keyword" placeholder="Broad search across candidate profile" value="{{ keyword }}">
+    </div>
 
-    <label>Skill:</label><br>
-    <input type="text" name="skill" placeholder="Example: Python" value="{{ skill }}"><br><br>
+    <div class="form-group">
+        <label>Skill:</label>
+        <input type="text" name="skill" placeholder="Example: Python" value="{{ skill }}">
+    </div>
 
-    <label>Education Level:</label><br>
-    <select name="education">
-        <option value="">Any</option>
-        <option value="Diploma" {% if education == "Diploma" %}selected{% endif %}>Diploma</option>
-        <option value="Bachelor" {% if education == "Bachelor" %}selected{% endif %}>Bachelor</option>
-        <option value="Master" {% if education == "Master" %}selected{% endif %}>Master</option>
-        <option value="Doctorate" {% if education == "Doctorate" %}selected{% endif %}>Doctorate</option>
-        <option value="Other" {% if education == "Other" %}selected{% endif %}>Other</option>
-    </select><br><br>
+    <div class="form-group">
+        <label>Education Level:</label>
+        <select name="education">
+            <option value="">Any</option>
+            <option value="Diploma" {% if education == "Diploma" %}selected{% endif %}>Diploma</option>
+            <option value="Bachelor" {% if education == "Bachelor" %}selected{% endif %}>Bachelor</option>
+            <option value="Master" {% if education == "Master" %}selected{% endif %}>Master</option>
+            <option value="Doctorate" {% if education == "Doctorate" %}selected{% endif %}>Doctorate</option>
+            <option value="Other" {% if education == "Other" %}selected{% endif %}>Other</option>
+        </select>
+    </div>
 
-    <label>Major:</label><br>
-    <input type="text" name="major" placeholder="Example: Computer Science" value="{{ major }}"><br><br>
+    <div class="form-group">
+        <label>Major:</label>
+        <input type="text" name="major" placeholder="Example: Computer Science" value="{{ major }}">
+    </div>
 
-    <label>Minimum Years of Experience:</label><br>
-    <input type="number" name="min_experience" min="0" placeholder="Example: 2" value="{{ min_experience }}"><br><br>
+    <div class="form-group">
+        <label>Minimum Years of Experience:</label>
+        <input type="number" name="min_experience" min="0" placeholder="Example: 2" value="{{ min_experience }}">
+    </div>
 
-    <label>Preferred Location:</label><br>
-    <input type="text" name="preferred_location" placeholder="Example: Sydney" value="{{ preferred_location }}"><br><br>
+    <div class="form-group">
+        <label>Preferred Location:</label>
+        <input type="text" name="preferred_location" placeholder="Example: Sydney" value="{{ preferred_location }}">
+    </div>
 
-    <label>Preferred Work Mode:</label><br>
-    <select name="preferred_work_mode">
-        <option value="">Any</option>
-        <option value="Remote" {% if preferred_work_mode == "Remote" %}selected{% endif %}>Remote</option>
-        <option value="Hybrid" {% if preferred_work_mode == "Hybrid" %}selected{% endif %}>Hybrid</option>
-        <option value="On-site" {% if preferred_work_mode == "On-site" %}selected{% endif %}>On-site</option>
-    </select><br><br>
+    <div class="form-group">
+        <label>Preferred Work Mode:</label>
+        <select name="preferred_work_mode">
+            <option value="">Any</option>
+            <option value="Remote" {% if preferred_work_mode == "Remote" %}selected{% endif %}>Remote</option>
+            <option value="Hybrid" {% if preferred_work_mode == "Hybrid" %}selected{% endif %}>Hybrid</option>
+            <option value="On-site" {% if preferred_work_mode == "On-site" %}selected{% endif %}>On-site</option>
+        </select>
+    </div>
 
-    <button type="submit">Search Candidates</button>
+    <button class="full-width" type="submit">Search Candidates</button>
 </form>
 
 {% if candidates %}
