@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Recommended Jobs</h2>
+
+<p>Jobs are ranked based on how closely they match your candidate profile.</p>
+
+{% if recommendations %}
+    {% for item in recommendations %}
+        <div class="job-card">
+            <h3>{{ item.job.job_title }}</h3>
+
+            <p><strong>Match Score:</strong> {{ item.score }}%</p>
+            <p><strong>Company:</strong> {{ item.job.company_name }}</p>
+            <p><strong>Location:</strong> {{ item.job.job_location }}</p>
+            <p><strong>Work Mode:</strong> {{ item.job.work_mode }}</p>
+            <p><strong>Job Type:</strong> {{ item.job.job_type }}</p>
+            <p><strong>Salary Range:</strong> {{ item.job.salary_range }}</p>
+            <p><strong>Required Education:</strong> {{ item.job.required_education }}</p>
+            <p><strong>Required Experience:</strong> {{ item.job.years_experience_required }} years</p>
+            <p><strong>Required Skills:</strong> {{ item.job.required_skills }}</p>
+
+            <p><strong>Description:</strong></p>
+            <p>{{ item.job.job_description }}</p>
+
+            <p><strong>Why this was recommended:</strong></p>
+            <ul>
+                {% for reason in item.reasons %}
+                    <li>{{ reason }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <br>
+    {% endfor %}
+{% else %}
+    <p>No recommendations available yet. Make sure your candidate profile is complete and jobs have been posted.</p>
+{% endif %}
+{% endblock %}
