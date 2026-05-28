@@ -38,8 +38,17 @@
     <label>Job Location:</label><br>
     <input type="text" name="job_location"><br><br>
 
-    <label>Salary Range:</label><br>
-    <input type="text" name="salary_range" placeholder="Example: $70,000 - $90,000"><br><br>
+    <label>Annual Salary Range:</label><br>
+    <select name="salary_range" required>
+        <option value="">Select annual salary range</option>
+        <option value="$40,000 - $50,000">$40,000 - $50,000</option>
+        <option value="$50,000 - $60,000">$50,000 - $60,000</option>
+        <option value="$60,000 - $70,000">$60,000 - $70,000</option>
+        <option value="$70,000 - $80,000">$70,000 - $80,000</option>
+        <option value="$80,000 - $100,000">$80,000 - $100,000</option>
+        <option value="$100,000 - $120,000">$100,000 - $120,000</option>
+        <option value="$120,000+">$120,000+</option>
+    </select><br><br>
 
     <label>Job Type:</label><br>
     <select name="job_type">

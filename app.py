@@ -3,6 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from difflib import SequenceMatcher
 import sqlite3
 import os
+import re
 
 app = Flask(__name__)
 app.secret_key = "replace-this-with-a-secret-key"
@@ -67,6 +68,20 @@ def fuzzy_contains(search_term, text, threshold=0.65):
             return True
 
     return False
+
+
+def extract_salary_upper_bound(salary_range):
+    if not salary_range:
+        return 0
+
+    salary_text = salary_range.lower().replace(",", "")
+    numbers = re.findall(r"\d+", salary_text)
+
+    if not numbers:
+        return 0
+
+    salary_values = [int(number) for number in numbers]
+    return max(salary_values)
 
 
 def calculate_job_match(candidate, job):
@@ -416,98 +431,90 @@ def job_list():
 
     keyword = request.args.get("keyword", "").strip()
     location = request.args.get("location", "").strip()
+    education = request.args.get("education", "").strip()
+    max_experience = request.args.get("max_experience", "").strip()
+    min_salary = request.args.get("min_salary", "").strip()
     work_mode = request.args.get("work_mode", "").strip()
     job_type = request.args.get("job_type", "").strip()
 
-    query = """
+    jobs = db.execute(
+        """
         SELECT jobs.*, companies.company_name, companies.company_description,
                companies.industry, companies.location AS company_location
         FROM jobs
         JOIN companies ON jobs.company_id = companies.company_id
-        WHERE 1 = 1
-    """
-    params = []
-
-    if keyword:
-        query += """
-            AND (
-                jobs.job_title LIKE ?
-                OR jobs.job_description LIKE ?
-                OR jobs.required_skills LIKE ?
-                OR jobs.required_education LIKE ?
-                OR jobs.salary_range LIKE ?
-                OR companies.company_name LIKE ?
-                OR companies.company_description LIKE ?
-                OR companies.industry LIKE ?
-            )
+        ORDER BY jobs.job_id DESC
         """
-        keyword_search = f"%{keyword}%"
-        params.extend([
-            keyword_search,
-            keyword_search,
-            keyword_search,
-            keyword_search,
-            keyword_search,
-            keyword_search,
-            keyword_search,
-            keyword_search
+    ).fetchall()
+
+    filtered_jobs = []
+
+    for job in jobs:
+        searchable_text = " ".join([
+            job["job_title"] or "",
+            job["job_description"] or "",
+            job["required_skills"] or "",
+            job["required_education"] or "",
+            job["salary_range"] or "",
+            job["job_location"] or "",
+            job["work_mode"] or "",
+            job["job_type"] or "",
+            job["company_name"] or "",
+            job["company_description"] or "",
+            job["industry"] or "",
+            job["company_location"] or ""
         ])
 
-    if location:
-        query += " AND (jobs.job_location LIKE ? OR companies.location LIKE ?)"
-        params.extend([f"%{location}%", f"%{location}%"])
+        if keyword and not fuzzy_contains(keyword, searchable_text):
+            continue
 
-    if work_mode:
-        query += " AND jobs.work_mode = ?"
-        params.append(work_mode)
+        if location and not (
+            fuzzy_contains(location, job["job_location"])
+            or fuzzy_contains(location, job["company_location"])
+        ):
+            continue
 
-    if job_type:
-        query += " AND jobs.job_type = ?"
-        params.append(job_type)
+        if education and job["required_education"] != education:
+            continue
 
-    query += " ORDER BY jobs.job_id DESC"
+        if max_experience:
+            try:
+                candidate_experience_limit = int(max_experience)
+            except ValueError:
+                candidate_experience_limit = 0
 
-    jobs = db.execute(query, params).fetchall()
+            required_years = job["years_experience_required"] or 0
 
-    if keyword and not jobs:
-        all_jobs = db.execute(
-            """
-            SELECT jobs.*, companies.company_name, companies.company_description,
-                   companies.industry, companies.location AS company_location
-            FROM jobs
-            JOIN companies ON jobs.company_id = companies.company_id
-            ORDER BY jobs.job_id DESC
-            """
-        ).fetchall()
+            if required_years > candidate_experience_limit:
+                continue
 
-        fuzzy_jobs = []
+        if min_salary:
+            try:
+                minimum_salary = int(min_salary)
+            except ValueError:
+                minimum_salary = 0
 
-        for job in all_jobs:
-            searchable_text = " ".join([
-                job["job_title"] or "",
-                job["job_description"] or "",
-                job["required_skills"] or "",
-                job["required_education"] or "",
-                job["salary_range"] or "",
-                job["job_location"] or "",
-                job["work_mode"] or "",
-                job["job_type"] or "",
-                job["company_name"] or "",
-                job["company_description"] or "",
-                job["industry"] or "",
-                job["company_location"] or ""
-            ])
+            salary_upper_bound = extract_salary_upper_bound(job["salary_range"])
 
-            if fuzzy_contains(keyword, searchable_text):
-                fuzzy_jobs.append(job)
+            if salary_upper_bound < minimum_salary:
+                continue
 
-        jobs = fuzzy_jobs
+        if work_mode and job["work_mode"] != work_mode:
+            continue
+
+        if job_type and job["job_type"] != job_type:
+            continue
+
+        filtered_jobs.append(job)
 
     return render_template(
         "job_list.html",
-        jobs=jobs,
+        jobs=filtered_jobs,
         keyword=keyword,
         location=location,
+        education=education,
+        max_experience=max_experience,
+        min_salary=min_salary,
         work_mode=work_mode,
         job_type=job_type
     )

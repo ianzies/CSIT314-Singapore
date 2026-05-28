@@ -17,6 +17,37 @@
     </div>
 
     <div class="form-group">
+        <label>Required Education Level:</label>
+        <select name="education">
+            <option value="">Any</option>
+            <option value="Diploma" {% if education == "Diploma" %}selected{% endif %}>Diploma</option>
+            <option value="Bachelor" {% if education == "Bachelor" %}selected{% endif %}>Bachelor</option>
+            <option value="Master" {% if education == "Master" %}selected{% endif %}>Master</option>
+            <option value="Doctorate" {% if education == "Doctorate" %}selected{% endif %}>Doctorate</option>
+            <option value="Other" {% if education == "Other" %}selected{% endif %}>Other</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Minimum Required Experience:</label>
+        <input type="number" name="max_experience" min="0" placeholder="Example: 2" value="{{ max_experience }}">
+    </div>
+
+    <div class="form-group">
+        <label>Minimum Annual Salary:</label>
+        <select name="min_salary">
+            <option value="">Any</option>
+            <option value="40000" {% if min_salary == "40000" %}selected{% endif %}>$40,000+</option>
+            <option value="50000" {% if min_salary == "50000" %}selected{% endif %}>$50,000+</option>
+            <option value="60000" {% if min_salary == "60000" %}selected{% endif %}>$60,000+</option>
+            <option value="70000" {% if min_salary == "70000" %}selected{% endif %}>$70,000+</option>
+            <option value="80000" {% if min_salary == "80000" %}selected{% endif %}>$80,000+</option>
+            <option value="100000" {% if min_salary == "100000" %}selected{% endif %}>$100,000+</option>
+        </select>
+    </div>
+
+
+    <div class="form-group">
         <label>Work Mode:</label>
         <select name="work_mode">
             <option value="">Any</option>
