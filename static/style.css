@@ -11,12 +11,14 @@ body {
         linear-gradient(135deg, #050505 0%, #111111 45%, #1c1c1c 100%);
     color: #f2f2f2;
     line-height: 1.6;
+    font-size: 18px;
 }
 
 nav {
     display: flex;
     gap: 24px;
     align-items: center;
+    justify-content: center;
     padding: 24px 8%;
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
     background: rgba(0, 0, 0, 0.55);
@@ -49,32 +51,35 @@ body > p,
 body > ul,
 body > form,
 body > div {
-    margin-left: 8%;
-    margin-right: 8%;
+    width: min(92%, 980px);
+    margin-left: auto;
+    margin-right: auto;
 }
 
 h1 {
-    font-size: clamp(2.5rem, 6vw, 5.5rem);
+    font-size: clamp(3rem, 7vw, 6.2rem);
     max-width: 900px;
     margin-top: 90px;
     margin-bottom: 24px;
     line-height: 0.95;
     letter-spacing: -0.06em;
     color: #ffffff;
+    text-align: center;
 }
 
 h2 {
-    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-size: clamp(2.25rem, 4.5vw, 4rem);
     margin-top: 70px;
     margin-bottom: 24px;
     letter-spacing: -0.04em;
     color: #ffffff;
+    text-align: center;
 }
 
 p {
-    max-width: 760px;
+    max-width: 860px;
     color: #cfcfcf;
-    font-size: 1.05rem;
+    font-size: 1.12rem;
 }
 
 ul {
@@ -92,9 +97,9 @@ li {
 }
 
 form {
-    max-width: 460px;
+    max-width: 560px;
     margin-top: 36px;
-    padding: 32px;
+    padding: 38px;
     background: rgba(255, 255, 255, 0.055);
     border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: 22px;
@@ -114,7 +119,7 @@ select,
 textarea {
     width: 100%;
     margin-top: 6px;
-    padding: 12px 14px;
+    padding: 14px 16px;
     background: #101010;
     color: #f4f4f4;
     border: 1px solid #3a3a3a;
@@ -131,7 +136,7 @@ textarea:focus {
 
 button {
     width: 100%;
-    padding: 13px 18px;
+    padding: 15px 20px;
     background: #f2f2f2;
     color: #080808;
     border: none;
