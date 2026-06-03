@@ -6,32 +6,57 @@
 </head>
 <body>
 
-<nav>
-    <a href="{{ url_for('index') }}">Home</a>
+<nav class="site-nav">
+    <a class="brand-mark" href="{{ url_for('index') }}">ALIGN</a>
 
-    {% if session.get("user_id") %}
-        {% if session.get("role") == "candidate" %}
-            <a href="{{ url_for('candidate_dashboard') }}">Dashboard</a>
-            <a href="{{ url_for('candidate_profile') }}">Profile</a>
-        {% elif session.get("role") == "employer" %}
-            <a href="{{ url_for('employer_dashboard') }}">Dashboard</a>
-            <a href="{{ url_for('company_profile') }}">Company Profile</a>
+    <div class="nav-links">
+        <a href="{{ url_for('index') }}">Home</a>
+
+        {% if session.get("user_id") %}
+            {% if session.get("role") == "candidate" %}
+                <a href="{{ url_for('candidate_dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('candidate_profile') }}">Profile</a>
+            {% elif session.get("role") == "employer" %}
+                <a href="{{ url_for('employer_dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('company_profile') }}">Company Profile</a>
+            {% endif %}
+
+            {% if session.get("membership_status") == "member" %}
+                <span class="member-badge">Member</span>
+            {% endif %}
+
+            <a href="{{ url_for('logout') }}">Logout</a>
+        {% else %}
+            <a href="{{ url_for('register') }}">Register</a>
+            <a href="{{ url_for('login') }}">Login</a>
         {% endif %}
-
-        {% if session.get("membership_status") == "member" %}
-            <span class="member-badge">Member</span>
-        {% endif %}
-
-        <a href="{{ url_for('logout') }}">Logout</a>
-    {% else %}
-        <a href="{{ url_for('register') }}">Register</a>
-        <a href="{{ url_for('login') }}">Login</a>
-    {% endif %}
+    </div>
 </nav>
 
-<hr>
 
 {% block content %}{% endblock %}
+
+<footer class="site-footer global-footer">
+    <div>
+        <h2>ALIGN</h2>
+        <p>Intelligent Talent Matching Platform</p>
+    </div>
+
+    <div class="footer-links">
+        <a href="{{ url_for('index') }}">Home</a>
+        {% if session.get("user_id") %}
+            {% if session.get("role") == "candidate" %}
+                <a href="{{ url_for('candidate_dashboard') }}">Dashboard</a>
+            {% elif session.get("role") == "employer" %}
+                <a href="{{ url_for('employer_dashboard') }}">Dashboard</a>
+            {% endif %}
+            <a href="{{ url_for('logout') }}">Logout</a>
+        {% else %}
+            <a href="{{ url_for('register') }}">Register</a>
+            <a href="{{ url_for('login') }}">Login</a>
+        {% endif %}
+    </div>
+</footer>
 
 </body>
 </html>

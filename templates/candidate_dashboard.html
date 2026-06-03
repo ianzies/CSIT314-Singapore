@@ -1,21 +1,45 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Candidate Dashboard</h2>
+<section class="dashboard-hero">
+    <p class="eyebrow">Candidate Workspace</p>
+    <h1>Candidate Dashboard</h1>
+    <p>
+        Manage your candidate profile, search job postings, and review ranked
+        job recommendations based on your skills, education, experience, and preferences.
+    </p>
+</section>
 
-<p>Welcome, candidate.</p>
+<section class="dashboard-status-card">
+    <div>
+        <span class="card-number">Access</span>
+        <h3>{{ session.get("membership_status")|replace("_", " ")|title }}</h3>
+    </div>
 
-<p><strong>Membership:</strong> {{ session.get("membership_status")|replace("_", " ")|title }}</p>
+    {% if session.get("membership_status") == "member" %}
+        <p>You have member access, so you can view all ranked job recommendations.</p>
+    {% else %}
+        <p>You are using a non-member account, so job recommendations are limited to the top 10 matches.</p>
+    {% endif %}
+</section>
 
-{% if session.get("membership_status") == "member" %}
-    <p>You have member access, so you can view all ranked job recommendations.</p>
-{% else %}
-    <p>You are using a non-member account, so job recommendations are limited to the top 10 matches.</p>
-{% endif %}
+<section class="dashboard-grid">
+    <a class="dashboard-card" href="{{ url_for('candidate_profile') }}">
+        <span class="card-number">01</span>
+        <h3>Candidate Profile</h3>
+        <p>Create or update your education, skills, experience, location, and work preferences.</p>
+    </a>
 
-<ul>
-    <li><a href="{{ url_for('candidate_profile') }}">Create or edit your candidate profile</a></li>
-    <li><a href="{{ url_for('job_list') }}">Search job postings</a></li>
-    <li><a href="{{ url_for('recommended_jobs') }}">View recommended jobs</a></li>
-</ul>
+    <a class="dashboard-card" href="{{ url_for('job_list') }}">
+        <span class="card-number">02</span>
+        <h3>Search Jobs</h3>
+        <p>Browse job postings using filters for location, education, experience, salary, work mode, and job type.</p>
+    </a>
+
+    <a class="dashboard-card" href="{{ url_for('recommended_jobs') }}">
+        <span class="card-number">03</span>
+        <h3>Recommendations</h3>
+        <p>View ranked job matches based on your candidate profile.</p>
+    </a>
+</section>
 {% endblock %}

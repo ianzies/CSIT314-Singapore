@@ -1,39 +1,72 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Recommended Candidates</h2>
-
-<p>Candidates are ranked based on how closely they match your posted jobs.</p>
+<section class="dashboard-hero recommendation-page-hero">
+    <p class="eyebrow">Employer Recommendations</p>
+    <h1>Recommended Candidates</h1>
+    <p>Candidates are ranked based on how closely they match your posted jobs.</p>
+</section>
 
 {% if recommendations %}
-    {% for item in recommendations %}
-        <div class="candidate-card">
-            <h3>{{ item.candidate.full_name }}</h3>
+    <section class="recommendation-list">
+        {% for item in recommendations %}
+            <article class="recommendation-card">
+                <div class="recommendation-topline">
+                    <span class="match-pill">{{ item.score }}% Match</span>
+                    <span class="card-number">Candidate {{ loop.index }}</span>
+                </div>
 
-            <p><strong>Best Match For:</strong> {{ item.job.job_title }}</p>
-            <p><strong>Match Score:</strong> {{ item.score }}%</p>
-            <p><strong>Contact:</strong> {{ item.candidate.contact_info }}</p>
-            <p><strong>Email:</strong> {{ item.candidate.email }}</p>
-            <p><strong>Education Level:</strong> {{ item.candidate.education }}</p>
-            <p><strong>Major:</strong> {{ item.candidate.major }}</p>
-            <p><strong>Years of Experience:</strong> {{ item.candidate.years_experience }}</p>
-            <p><strong>Skills:</strong> {{ item.candidate.skills }}</p>
-            <p><strong>Preferred Work Mode:</strong> {{ item.candidate.preferred_work_mode }}</p>
-            <p><strong>Preferred Location:</strong> {{ item.candidate.preferred_location }}</p>
+                <div class="recommendation-main">
+                    <div>
+                        <h3>{{ item.candidate.full_name }}</h3>
+                        <p class="recommendation-subtitle">
+                            Best match for {{ item.job.job_title }} · {{ item.candidate.preferred_location }}
+                        </p>
+                    </div>
+                </div>
 
-            <p><strong>Work Experience:</strong></p>
-            <p>{{ item.candidate.work_experience }}</p>
+                <div class="chip-row">
+                    <span>{{ item.candidate.education }}</span>
+                    <span>{{ item.candidate.major }}</span>
+                    <span>{{ item.candidate.years_experience }} years</span>
+                    <span>{{ item.candidate.preferred_work_mode }}</span>
+                </div>
 
-            <p><strong>Why this candidate was recommended:</strong></p>
-            <ul>
-                {% for reason in item.reasons %}
-                    <li>{{ reason }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-        <br>
-    {% endfor %}
+                <p class="recommendation-summary">
+                    {{ item.candidate.work_experience }}
+                </p>
+
+                <details class="recommendation-details">
+                    <summary>View details</summary>
+
+                    <div class="details-grid">
+                        <p><strong>Best Match For:</strong> {{ item.job.job_title }}</p>
+                        <p><strong>Contact:</strong> {{ item.candidate.contact_info }}</p>
+                        <p><strong>Email:</strong> {{ item.candidate.email }}</p>
+                        <p><strong>Education Level:</strong> {{ item.candidate.education }}</p>
+                        <p><strong>Major:</strong> {{ item.candidate.major }}</p>
+                        <p><strong>Years of Experience:</strong> {{ item.candidate.years_experience }}</p>
+                        <p><strong>Preferred Work Mode:</strong> {{ item.candidate.preferred_work_mode }}</p>
+                        <p><strong>Preferred Location:</strong> {{ item.candidate.preferred_location }}</p>
+                        <p><strong>Skills:</strong> {{ item.candidate.skills }}</p>
+                    </div>
+
+                    <div class="why-card">
+                        <h4>Why this candidate was recommended</h4>
+                        <ul>
+                            {% for reason in item.reasons %}
+                                <li>{{ reason }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </details>
+            </article>
+        {% endfor %}
+    </section>
 {% else %}
-    <p>No candidate recommendations available yet. Make sure candidates have created profiles and your company has posted jobs.</p>
+    <section class="empty-state-card">
+        <h3>No candidate recommendations available yet.</h3>
+        <p>Make sure candidates have created profiles and your company has posted jobs.</p>
+    </section>
 {% endif %}
 {% endblock %}

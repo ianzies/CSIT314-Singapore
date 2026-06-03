@@ -1,14 +1,96 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Intelligent Talent Matching Platform</h1>
+<section class="home-hero">
+    <p class="eyebrow">Intelligent Talent Matching Platform</p>
+    <h1>
+        <span class="hero-line">Better matches.</span>
+        <span class="hero-line">Faster hiring.</span>
+    </h1>
+    <p class="hero-copy">
+        ALIGN connects candidates and employers through structured profiles,
+        searchable job data, and ranked recommendations.
+    </p>
 
-<p>
-    This platform helps job-seeking candidates and employers find better matches
-    through structured profiles, job postings, search, and recommendations.
-</p>
+    <div class="hero-actions">
+        <a class="btn-primary" href="{{ url_for('register') }}">Get Started</a>
+        <a class="btn-secondary" href="{{ url_for('login') }}">Log In</a>
+    </div>
+</section>
 
-<p>
-    Please register or log in to continue.
-</p>
+<section class="rounded-panel intro-panel">
+    <div>
+        <p class="eyebrow">What ALIGN does</p>
+        <h2>Clearer hiring, cleaner matching.</h2>
+    </div>
+    <p>
+        ALIGN is a prototype recruitment platform designed to make job discovery
+        and candidate shortlisting more structured. Candidates build detailed
+        profiles, employers post role requirements, and the system ranks matches
+        using skills, education, experience, work mode, and location.
+    </p>
+</section>
+
+<section class="feature-grid">
+    <article class="feature-card">
+        <span class="card-number">01</span>
+        <h3>For Candidates</h3>
+        <p>
+            Create a profile, browse jobs, filter opportunities, and view ranked
+            job recommendations based on your background and preferences.
+        </p>
+    </article>
+
+    <article class="feature-card">
+        <span class="card-number">02</span>
+        <h3>For Employers</h3>
+        <p>
+            Build a company profile, create job postings, search candidates,
+            and view recommended candidates for each hiring need.
+        </p>
+    </article>
+
+    <article class="feature-card">
+        <span class="card-number">03</span>
+        <h3>Membership Access</h3>
+        <p>
+            Members receive unlimited ranked recommendations, while non-members
+            can view the top 10 matches.
+        </p>
+    </article>
+</section>
+
+<section class="reviews-section">
+    <div class="section-heading">
+        <p class="eyebrow">Platform feedback</p>
+        <h2>Built for faster decisions.</h2>
+    </div>
+
+    <div class="review-grid">
+        <article class="review-card">
+            <p>
+                “The recommendation score made it easier to find relevant roles
+                without checking every listing manually.”
+            </p>
+            <span>Candidate Tester</span>
+        </article>
+
+        <article class="review-card">
+            <p>
+                “The filtering tools helped us shortlist candidates by skills,
+                location, education, and experience.”
+            </p>
+            <span>Employer Tester</span>
+        </article>
+
+        <article class="review-card">
+            <p>
+                “The member and non-member recommendation limits are clear and
+                easy to demonstrate.”
+            </p>
+            <span>Project Reviewer</span>
+        </article>
+    </div>
+</section>
+
 {% endblock %}

@@ -1,38 +1,72 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Recommended Jobs</h2>
-
-<p>Jobs are ranked based on how closely they match your candidate profile.</p>
+<section class="dashboard-hero recommendation-page-hero">
+    <p class="eyebrow">Candidate Recommendations</p>
+    <h1>Recommended Jobs</h1>
+    <p>Jobs are ranked based on how closely they match your candidate profile.</p>
+</section>
 
 {% if recommendations %}
-    {% for item in recommendations %}
-        <div class="job-card">
-            <h3>{{ item.job.job_title }}</h3>
+    <section class="recommendation-list">
+        {% for item in recommendations %}
+            <article class="recommendation-card">
+                <div class="recommendation-topline">
+                    <span class="match-pill">{{ item.score }}% Match</span>
+                    <span class="card-number">Job {{ loop.index }}</span>
+                </div>
 
-            <p><strong>Match Score:</strong> {{ item.score }}%</p>
-            <p><strong>Company:</strong> {{ item.job.company_name }}</p>
-            <p><strong>Location:</strong> {{ item.job.job_location }}</p>
-            <p><strong>Work Mode:</strong> {{ item.job.work_mode }}</p>
-            <p><strong>Job Type:</strong> {{ item.job.job_type }}</p>
-            <p><strong>Salary Range:</strong> {{ item.job.salary_range }}</p>
-            <p><strong>Required Education Level:</strong> {{ item.job.required_education }}</p>
-            <p><strong>Required Experience:</strong> {{ item.job.years_experience_required }} years</p>
-            <p><strong>Required Skills:</strong> {{ item.job.required_skills }}</p>
+                <div class="recommendation-main">
+                    <div>
+                        <h3>{{ item.job.job_title }}</h3>
+                        <p class="recommendation-subtitle">
+                            {{ item.job.company_name }} · {{ item.job.job_location }}
+                        </p>
+                    </div>
+                </div>
 
-            <p><strong>Description:</strong></p>
-            <p>{{ item.job.job_description }}</p>
+                <div class="chip-row">
+                    <span>{{ item.job.work_mode }}</span>
+                    <span>{{ item.job.job_type }}</span>
+                    <span>{{ item.job.required_education }}</span>
+                    <span>{{ item.job.years_experience_required }} years</span>
+                    <span>{{ item.job.salary_range }}</span>
+                </div>
 
-            <p><strong>Why this was recommended:</strong></p>
-            <ul>
-                {% for reason in item.reasons %}
-                    <li>{{ reason }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-        <br>
-    {% endfor %}
+                <p class="recommendation-summary">
+                    {{ item.job.job_description }}
+                </p>
+
+                <details class="recommendation-details">
+                    <summary>View details</summary>
+
+                    <div class="details-grid">
+                        <p><strong>Company:</strong> {{ item.job.company_name }}</p>
+                        <p><strong>Location:</strong> {{ item.job.job_location }}</p>
+                        <p><strong>Work Mode:</strong> {{ item.job.work_mode }}</p>
+                        <p><strong>Job Type:</strong> {{ item.job.job_type }}</p>
+                        <p><strong>Salary Range:</strong> {{ item.job.salary_range }}</p>
+                        <p><strong>Required Education:</strong> {{ item.job.required_education }}</p>
+                        <p><strong>Required Experience:</strong> {{ item.job.years_experience_required }} years</p>
+                        <p><strong>Required Skills:</strong> {{ item.job.required_skills }}</p>
+                    </div>
+
+                    <div class="why-card">
+                        <h4>Why this was recommended</h4>
+                        <ul>
+                            {% for reason in item.reasons %}
+                                <li>{{ reason }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </details>
+            </article>
+        {% endfor %}
+    </section>
 {% else %}
-    <p>No recommendations available yet. Make sure your candidate profile is complete and jobs have been posted.</p>
+    <section class="empty-state-card">
+        <h3>No recommendations available yet.</h3>
+        <p>Make sure your candidate profile is complete and jobs have been posted.</p>
+    </section>
 {% endif %}
 {% endblock %}

@@ -1,22 +1,51 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Employer Dashboard</h2>
+<section class="dashboard-hero">
+    <p class="eyebrow">Employer Workspace</p>
+    <h1>Employer Dashboard</h1>
+    <p>
+        Manage your company profile, create job postings, search candidate profiles,
+        and review ranked candidate recommendations.
+    </p>
+</section>
 
-<p>Welcome, employer.</p>
+<section class="dashboard-status-card">
+    <div>
+        <span class="card-number">Access</span>
+        <h3>{{ session.get("membership_status")|replace("_", " ")|title }}</h3>
+    </div>
 
-<p><strong>Membership:</strong> {{ session.get("membership_status")|replace("_", " ")|title }}</p>
+    {% if session.get("membership_status") == "member" %}
+        <p>You have member access, so you can view all ranked candidate recommendations.</p>
+    {% else %}
+        <p>You are using a non-member account, so candidate recommendations are limited to the top 10 matches.</p>
+    {% endif %}
+</section>
 
-{% if session.get("membership_status") == "member" %}
-    <p>You have member access, so you can view all ranked candidate recommendations.</p>
-{% else %}
-    <p>You are using a non-member account, so candidate recommendations are limited to the top 10 matches.</p>
-{% endif %}
+<section class="dashboard-grid">
+    <a class="dashboard-card" href="{{ url_for('company_profile') }}">
+        <span class="card-number">01</span>
+        <h3>Company Profile</h3>
+        <p>Create or update your company information so candidates can understand your organisation.</p>
+    </a>
 
-<ul>
-    <li><a href="{{ url_for('company_profile') }}">Create or edit your company profile</a></li>
-    <li><a href="{{ url_for('create_job') }}">Create multiple job postings</a></li>
-    <li><a href="{{ url_for('candidate_list') }}">Search candidate profiles</a></li>
-    <li><a href="{{ url_for('recommended_candidates') }}">View recommended candidates</a></li>
-</ul>
+    <a class="dashboard-card" href="{{ url_for('create_job') }}">
+        <span class="card-number">02</span>
+        <h3>Post Jobs</h3>
+        <p>Create job postings with role requirements, salary range, work mode, and job type.</p>
+    </a>
+
+    <a class="dashboard-card" href="{{ url_for('candidate_list') }}">
+        <span class="card-number">03</span>
+        <h3>Search Candidates</h3>
+        <p>Browse candidate profiles using filters for skills, education, experience, location, and work mode.</p>
+    </a>
+
+    <a class="dashboard-card" href="{{ url_for('recommended_candidates') }}">
+        <span class="card-number">04</span>
+        <h3>Recommendations</h3>
+        <p>View ranked candidate matches based on your hiring requirements.</p>
+    </a>
+</section>
 {% endblock %}
