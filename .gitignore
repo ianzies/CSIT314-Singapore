@@ -233,3 +233,6 @@ uploads/resumes/*
 # Local database backups
 database_backup.db
 *.db-journal
+
+# Local demo seed script
+static/seed_demo_data.py
