@@ -893,6 +893,40 @@ input[type="file"]::file-selector-button:hover {
     background: rgba(255, 255, 255, 0.14);
 }
 
+.checkbox-field {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-top: 18px;
+    padding: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.78);
+    cursor: pointer;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 0.98rem;
+    font-weight: 650;
+    line-height: 1.45;
+}
+
+.checkbox-field input[type="checkbox"] {
+    width: 22px;
+    min-width: 22px;
+    height: 22px;
+    min-height: 22px;
+    margin: 2px 0 0;
+    padding: 0;
+    accent-color: #ffffff;
+    cursor: pointer;
+    box-shadow: none;
+}
+
+.checkbox-field span {
+    display: block;
+}
+
 input[readonly] {
     color: rgba(255, 255, 255, 0.68);
     background: rgba(255, 255, 255, 0.035);

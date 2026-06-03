@@ -111,6 +111,14 @@
                         <h4>Work Experience</h4>
                         <p>{{ candidate.work_experience }}</p>
                     </div>
+
+                    {% if candidate.resume_filename and candidate.resume_visible_to_employers %}
+                        <div class="management-actions">
+                            <a class="btn-secondary" href="{{ url_for('view_candidate_resume', candidate_id=candidate.candidate_id) }}" target="_blank">
+                                View Resume
+                            </a>
+                        </div>
+                    {% endif %}
                 </details>
             </article>
         {% endfor %}

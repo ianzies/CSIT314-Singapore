@@ -59,6 +59,14 @@
                             {% endfor %}
                         </ul>
                     </div>
+
+                    {% if item.candidate.resume_filename and item.candidate.resume_visible_to_employers %}
+                        <div class="management-actions">
+                            <a class="btn-secondary" href="{{ url_for('view_candidate_resume', candidate_id=item.candidate.candidate_id) }}" target="_blank">
+                                View Resume
+                            </a>
+                        </div>
+                    {% endif %}
                 </details>
             </article>
         {% endfor %}

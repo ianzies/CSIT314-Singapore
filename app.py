@@ -1,4 +1,4 @@
-from flask import Flask, render_template, render_template_string, request, redirect, session, url_for, g
+from flask import Flask, render_template, render_template_string, request, redirect, session, url_for, g, send_from_directory
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from difflib import SequenceMatcher
@@ -12,6 +12,34 @@ app.secret_key = "replace-this-with-a-secret-key"
 DATABASE = "database.db"
 UPLOAD_FOLDER = os.path.join("uploads", "resumes")
 ALLOWED_RESUME_EXTENSIONS = {"pdf", "doc", "docx"}
+
+SEARCH_SYNONYMS = {
+    "ai": ["artificial intelligence", "machine learning", "ml"],
+    "artificial intelligence": ["ai"],
+    "ml": ["machine learning", "artificial intelligence", "ai"],
+    "machine learning": ["ml", "ai", "artificial intelligence"],
+    "cybersecurity": ["cyber security", "information security", "infosec"],
+    "cyber security": ["cybersecurity", "information security", "infosec"],
+    "infosec": ["information security", "cybersecurity", "cyber security"],
+    "software engineer": ["software developer", "developer", "programmer"],
+    "software developer": ["software engineer", "developer", "programmer"],
+    "developer": ["software engineer", "software developer", "programmer"],
+    "programmer": ["developer", "software developer", "software engineer"],
+    "data analyst": ["data analytics", "analytics", "data analysis"],
+    "data analytics": ["data analyst", "analytics", "data analysis"],
+    "database": ["sql", "mysql", "postgresql"],
+    "sql": ["database", "mysql", "postgresql"],
+    "frontend": ["front end", "html", "css", "javascript"],
+    "front end": ["frontend", "html", "css", "javascript"],
+    "backend": ["back end", "server", "api"],
+    "back end": ["backend", "server", "api"],
+    "remote": ["work from home", "wfh"],
+    "work from home": ["remote", "wfh"],
+    "wfh": ["remote", "work from home"],
+    "onsite": ["on site", "on-site"],
+    "on site": ["onsite", "on-site"],
+    "on-site": ["onsite", "on site"]
+}
 
 
 def get_db():
@@ -44,8 +72,107 @@ def normalise_words(text):
     if text is None:
         return set()
 
-    cleaned_text = text.lower().replace(",", " ")
-    return set(cleaned_text.split())
+    cleaned_text = re.sub(r"[^a-zA-Z0-9+#]+", " ", text.lower())
+    return {word.strip() for word in cleaned_text.split() if word.strip()}
+
+
+def normalise_text(text):
+    if text is None:
+        return ""
+
+    return re.sub(r"[^a-zA-Z0-9+#]+", " ", text.lower()).strip()
+
+
+def text_windows(words, window_size):
+    if len(words) < window_size:
+        return []
+
+    return [" ".join(words[index:index + window_size]) for index in range(len(words) - window_size + 1)]
+
+
+def expand_search_terms(search_term):
+    normalised_term = normalise_text(search_term)
+
+    if not normalised_term:
+        return []
+
+    terms = {normalised_term}
+
+    compact_term = normalised_term.replace(" ", "")
+    if compact_term != normalised_term:
+        terms.add(compact_term)
+
+    for synonym in SEARCH_SYNONYMS.get(normalised_term, []):
+        terms.add(normalise_text(synonym))
+        terms.add(normalise_text(synonym).replace(" ", ""))
+
+    return [term for term in terms if term]
+
+
+def calculate_skill_score(candidate_skills_text, required_skills_text):
+    candidate_skills = normalise_words(candidate_skills_text)
+    required_skills = normalise_words(required_skills_text)
+
+    if not required_skills:
+        return 40, []
+
+    matching_skills = candidate_skills.intersection(required_skills)
+    score = round((len(matching_skills) / len(required_skills)) * 40)
+
+    return score, sorted(matching_skills)
+
+
+def education_score(candidate_education, required_education):
+    education_rank = {
+        "Diploma": 1,
+        "Bachelor": 2,
+        "Master": 3,
+        "Doctorate": 4,
+        "Other": 0
+    }
+
+    if not required_education:
+        return 20
+
+    candidate_rank = education_rank.get(candidate_education, 0)
+    required_rank = education_rank.get(required_education, 0)
+
+    if candidate_rank >= required_rank and required_rank > 0:
+        return 20
+
+    return 0
+
+
+def experience_score(candidate_experience, required_experience):
+    candidate_years = int(candidate_experience or 0)
+    required_years = int(required_experience or 0)
+
+    if required_years == 0:
+        return 20
+
+    if candidate_years >= required_years:
+        return 20
+
+    return round((candidate_years / required_years) * 20)
+
+
+def preference_score(candidate_value, job_value, weight):
+    candidate_value = (candidate_value or "").strip().lower()
+    job_value = (job_value or "").strip().lower()
+
+    if not candidate_value or not job_value:
+        return 0
+
+    if candidate_value == job_value:
+        return weight
+
+    if candidate_value in job_value or job_value in candidate_value:
+        return round(weight * 0.8)
+
+    if fuzzy_score(candidate_value, job_value) >= 0.75:
+        return round(weight * 0.6)
+
+    return 0
 
 
 def fuzzy_score(a, b):
@@ -55,23 +182,53 @@ def fuzzy_score(a, b):
     return SequenceMatcher(None, a.lower(), b.lower()).ratio()
 
 
-def fuzzy_contains(search_term, text, threshold=0.65):
+def exact_term_match(term, normalised_text, compact_text, words, phrase_windows):
+    term_words = term.split()
+    compact_term = term.replace(" ", "")
+
+    if len(compact_term) <= 2:
+        return compact_term in words
+
+    if len(term_words) > 1:
+        return term in phrase_windows or compact_term in compact_text
+
+    return term in words
+
+
+def fuzzy_contains(search_term, text, threshold=0.78):
     if not search_term or not text:
         return False
 
-    search_term = search_term.lower()
-    text = text.lower().replace(",", " ")
+    original_term = normalise_text(search_term)
+    if not original_term:
+        return False
 
-    if search_term in text:
-        return True
+    search_terms = expand_search_terms(search_term)
+    normalised_text = normalise_text(text)
+    compact_text = normalised_text.replace(" ", "")
+    words = normalised_text.split()
+    phrase_windows = text_windows(words, 2) + text_windows(words, 3)
 
-    words = text.split()
-
-    for word in words:
-        if search_term in word or word in search_term:
+    for term in search_terms:
+        if exact_term_match(term, normalised_text, compact_text, words, phrase_windows):
             return True
 
-        if fuzzy_score(search_term, word) >= threshold:
+    original_compact = original_term.replace(" ", "")
+
+    if len(original_compact) <= 2:
+        return False
+
+    original_words = original_term.split()
+    fuzzy_targets = words
+
+    if len(original_words) > 1:
+        fuzzy_targets = phrase_windows
+
+    for target in fuzzy_targets:
+        if not target:
+            continue
+
+        if fuzzy_score(original_term, target) >= threshold:
             return True
 
     return False
@@ -95,36 +252,45 @@ def calculate_job_match(candidate, job):
     score = 0
     reasons = []
 
-    candidate_skills = normalise_words(candidate["skills"])
-    job_skills = normalise_words(job["required_skills"])
-
-    matching_skills = candidate_skills.intersection(job_skills)
+    skill_points, matching_skills = calculate_skill_score(candidate["skills"], job["required_skills"])
+    score += skill_points
 
     if matching_skills:
-        score += 40
-        reasons.append("Skills match: " + ", ".join(sorted(matching_skills)))
+        reasons.append(
+            "Skills matched: " + ", ".join(matching_skills)
+        )
+    elif job["required_skills"]:
+        reasons.append("No required skills were directly matched.")
 
-    if candidate["preferred_work_mode"] == job["work_mode"]:
-        score += 20
-        reasons.append("Preferred work mode matches the job work mode.")
+    edu_points = education_score(candidate["education"], job["required_education"])
+    score += edu_points
 
-    candidate_location = (candidate["preferred_location"] or "").lower()
-    job_location = (job["job_location"] or "").lower()
+    if edu_points:
+        reasons.append("Education requirement met.")
+    else:
+        reasons.append("Education level is below the listed requirement.")
 
-    if candidate_location and candidate_location in job_location:
-        score += 15
-        reasons.append("Preferred location matches the job location.")
+    exp_points = experience_score(candidate["years_experience"], job["years_experience_required"])
+    score += exp_points
 
-    if candidate["education"] == job["required_education"]:
-        score += 15
-        reasons.append("Candidate education level matches the job education requirement.")
+    if exp_points == 20:
+        reasons.append("Experience requirement met or exceeded.")
+    elif exp_points > 0:
+        reasons.append("Experience partially aligns with the requirement.")
+    else:
+        reasons.append("Experience does not meet the listed requirement.")
 
-    candidate_experience = candidate["years_experience"] or 0
-    required_experience = job["years_experience_required"] or 0
+    work_mode_points = preference_score(candidate["preferred_work_mode"], job["work_mode"], 10)
+    score += work_mode_points
 
-    if candidate_experience >= required_experience:
-        score += 10
-        reasons.append("Candidate experience meets or exceeds the requirement.")
+    if work_mode_points:
+        reasons.append("Preferred work mode aligns with this job.")
+
+    location_points = preference_score(candidate["preferred_location"], job["job_location"], 10)
+    score += location_points
+
+    if location_points:
+        reasons.append("Preferred location aligns with this job.")
 
     if not reasons:
         reasons.append("This job has limited direct profile matches, but is still available for review.")
@@ -137,36 +303,45 @@ def calculate_candidate_match(candidate, job):
     score = 0
     reasons = []
 
-    candidate_skills = normalise_words(candidate["skills"])
-    job_skills = normalise_words(job["required_skills"])
-
-    matching_skills = candidate_skills.intersection(job_skills)
+    skill_points, matching_skills = calculate_skill_score(candidate["skills"], job["required_skills"])
+    score += skill_points
 
     if matching_skills:
-        score += 40
-        reasons.append("Skills match: " + ", ".join(sorted(matching_skills)))
+        reasons.append(
+            "Skills matched: " + ", ".join(matching_skills)
+        )
+    elif job["required_skills"]:
+        reasons.append("No required skills were directly matched.")
 
-    if candidate["preferred_work_mode"] == job["work_mode"]:
-        score += 20
-        reasons.append("Candidate preferred work mode matches the job work mode.")
+    edu_points = education_score(candidate["education"], job["required_education"])
+    score += edu_points
 
-    candidate_location = (candidate["preferred_location"] or "").lower()
-    job_location = (job["job_location"] or "").lower()
+    if edu_points:
+        reasons.append("Education requirement met.")
+    else:
+        reasons.append("Education level is below the job requirement.")
 
-    if candidate_location and candidate_location in job_location:
-        score += 15
-        reasons.append("Candidate preferred location matches the job location.")
+    exp_points = experience_score(candidate["years_experience"], job["years_experience_required"])
+    score += exp_points
 
-    if candidate["education"] == job["required_education"]:
-        score += 15
-        reasons.append("Candidate education level matches the job education requirement.")
+    if exp_points == 20:
+        reasons.append("Experience requirement met or exceeded.")
+    elif exp_points > 0:
+        reasons.append("Experience partially aligns with the job requirement.")
+    else:
+        reasons.append("Experience does not meet the job requirement.")
 
-    candidate_experience = candidate["years_experience"] or 0
-    required_experience = job["years_experience_required"] or 0
+    work_mode_points = preference_score(candidate["preferred_work_mode"], job["work_mode"], 10)
+    score += work_mode_points
 
-    if candidate_experience >= required_experience:
-        score += 10
-        reasons.append("Candidate experience meets or exceeds the job requirement.")
+    if work_mode_points:
+        reasons.append("Preferred work mode aligns with the job.")
+
+    location_points = preference_score(candidate["preferred_location"], job["job_location"], 10)
+    score += location_points
+
+    if location_points:
+        reasons.append("Preferred location aligns with the job location.")
 
     if not reasons:
         reasons.append("This candidate has limited direct matches, but may still be worth reviewing.")
@@ -410,6 +585,7 @@ def candidate_profile():
         skills = request.form["skills"]
         preferred_work_mode = request.form["preferred_work_mode"]
         preferred_location = request.form["preferred_location"]
+        resume_visible_to_employers = 1 if request.form.get("resume_visible_to_employers") == "1" else 0
         resume_filename = profile["resume_filename"] if profile and "resume_filename" in profile.keys() else None
 
         resume_file = request.files.get("resume")
@@ -437,13 +613,15 @@ def candidate_profile():
                 UPDATE candidates
                 SET full_name = ?, contact_info = ?, education = ?, major = ?,
                     years_experience = ?, work_experience = ?, skills = ?,
-                    preferred_work_mode = ?, preferred_location = ?, resume_filename = ?
+                    preferred_work_mode = ?, preferred_location = ?, resume_filename = ?,
+                    resume_visible_to_employers = ?
                 WHERE user_id = ?
                 """,
                 (
                     full_name, contact_info, education, major,
                     years_experience, work_experience, skills,
-                    preferred_work_mode, preferred_location, resume_filename, user_id
+                    preferred_work_mode, preferred_location, resume_filename,
+                    resume_visible_to_employers, user_id
                 )
             )
         else:
@@ -452,14 +630,16 @@ def candidate_profile():
                 INSERT INTO candidates (
                     user_id, full_name, contact_info, education, major,
                     years_experience, work_experience, skills,
-                    preferred_work_mode, preferred_location, resume_filename
+                    preferred_work_mode, preferred_location, resume_filename,
+                    resume_visible_to_employers
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     user_id, full_name, contact_info, education, major,
                     years_experience, work_experience, skills,
-                    preferred_work_mode, preferred_location, resume_filename
+                    preferred_work_mode, preferred_location, resume_filename,
+                    resume_visible_to_employers
                 )
             )
 
@@ -467,6 +647,82 @@ def candidate_profile():
         return redirect(url_for("candidate_dashboard"))
 
     return render_template("candidate_profile.html", profile=profile)
+
+
+# Route for employers to view candidate resume (if allowed)
+@app.route("/candidate/resume/<int:candidate_id>")
+def view_candidate_resume(candidate_id):
+    if session.get("role") != "employer":
+        return redirect(url_for("login"))
+
+    if session.get("membership_status") != "member":
+        return render_message(
+            "Membership Required",
+            "Only member employers can view candidate resumes.",
+            "Upgrade Membership",
+            "membership",
+            "Back to Dashboard",
+            "employer_dashboard"
+        )
+
+    db = get_db()
+    user_id = session["user_id"]
+
+    company = db.execute(
+        "SELECT * FROM companies WHERE user_id = ?",
+        (user_id,)
+    ).fetchone()
+
+    if company is None:
+        return render_message(
+            "Company Profile Required",
+            "Create your company profile before viewing candidate resumes.",
+            "Create Company Profile",
+            "company_profile",
+            "Back to Dashboard",
+            "employer_dashboard"
+        )
+
+    candidate = db.execute(
+        "SELECT * FROM candidates WHERE candidate_id = ?",
+        (candidate_id,)
+    ).fetchone()
+
+    if candidate is None:
+        return render_message(
+            "Candidate Not Found",
+            "This candidate profile could not be found.",
+            "Back to Candidates",
+            "candidate_list",
+            "Back to Dashboard",
+            "employer_dashboard"
+        )
+
+    if not candidate["resume_filename"]:
+        return render_message(
+            "Resume Not Available",
+            "This candidate has not uploaded a resume.",
+            "Back to Candidates",
+            "candidate_list",
+            "Back to Dashboard",
+            "employer_dashboard"
+        )
+
+    if not candidate["resume_visible_to_employers"]:
+        return render_message(
+            "Resume Access Restricted",
+            "This candidate has not given permission for employers to view their resume.",
+            "Back to Candidates",
+            "candidate_list",
+            "Back to Dashboard",
+            "employer_dashboard"
+        )
+
+    return send_from_directory(
+        UPLOAD_FOLDER,
+        candidate["resume_filename"],
+        as_attachment=False
+    )
 
 
 @app.route("/employer/dashboard")

@@ -147,6 +147,17 @@
                         No resume uploaded yet. You can still save your profile using the structured form fields.
                     </p>
                 {% endif %}
+
+                <label class="checkbox-field">
+                    <input type="checkbox" name="resume_visible_to_employers" value="1" {% if profile and profile.resume_visible_to_employers %}checked{% endif %}>
+                    <span>
+                        Allow member employers with a registered company profile to view my uploaded resume.
+                    </span>
+                </label>
+
+                <p class="form-note uploaded-file-note">
+                    Resume access is private by default. Only enable this if you are comfortable sharing your resume with eligible employers.
+                </p>
             </div>
         </div>
     </section>

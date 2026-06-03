@@ -25,6 +25,7 @@ CREATE TABLE candidates (
     preferred_work_mode TEXT,
     preferred_location TEXT,
     resume_filename TEXT,
+    resume_visible_to_employers INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
