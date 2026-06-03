@@ -47,5 +47,13 @@
         <h3>Recommendations</h3>
         <p>View ranked candidate matches based on your hiring requirements.</p>
     </a>
+
+    {% if session.get("membership_status") != "member" %}
+        <a class="dashboard-card upgrade-card" href="{{ url_for('membership') }}">
+            <span class="card-number">Upgrade</span>
+            <h3>Become a Member</h3>
+            <p>Activate demo membership to unlock unlimited ranked candidate recommendations.</p>
+        </a>
+    {% endif %}
 </section>
 {% endblock %}

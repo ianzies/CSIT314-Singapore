@@ -36,10 +36,19 @@
         <p>Browse job postings using filters for location, education, experience, salary, work mode, and job type.</p>
     </a>
 
+</a>
     <a class="dashboard-card" href="{{ url_for('recommended_jobs') }}">
         <span class="card-number">03</span>
         <h3>Recommendations</h3>
         <p>View ranked job matches based on your candidate profile.</p>
     </a>
+
+    {% if session.get("membership_status") != "member" %}
+        <a class="dashboard-card upgrade-card" href="{{ url_for('membership') }}">
+            <span class="card-number">Upgrade</span>
+            <h3>Become a Member</h3>
+            <p>Activate demo membership to unlock unlimited ranked job recommendations.</p>
+        </a>
+    {% endif %}
 </section>
 {% endblock %}

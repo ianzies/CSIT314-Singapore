@@ -567,6 +567,144 @@ a {
     font-size: 1rem;
 }
 
+.upgrade-card {
+    position: relative;
+    overflow: hidden;
+    border-color: rgba(214, 176, 96, 0.62);
+    background:
+        radial-gradient(ellipse at 78% 0%, rgba(255, 238, 184, 0.34), transparent 32%),
+        radial-gradient(ellipse at 38% -18%, rgba(255, 217, 128, 0.18), transparent 34%),
+        linear-gradient(180deg, rgba(52, 40, 16, 0.78), rgba(17, 17, 14, 0.94));
+    box-shadow:
+        0 34px 90px rgba(0, 0, 0, 0.42),
+        inset 0 1px 0 rgba(255, 235, 170, 0.24),
+        0 0 72px rgba(191, 144, 55, 0.16);
+}
+
+.upgrade-card::before {
+    content: "";
+    position: absolute;
+    inset: -45% -22%;
+    background:
+        linear-gradient(104deg, transparent 0 32%, rgba(255, 226, 150, 0.11) 37%, rgba(255, 236, 180, 0.22) 41%, rgba(255, 226, 150, 0.08) 46%, transparent 55%),
+        linear-gradient(116deg, transparent 0 45%, rgba(255, 243, 207, 0.08) 50%, rgba(255, 232, 166, 0.18) 54%, rgba(255, 209, 113, 0.07) 59%, transparent 68%),
+        linear-gradient(128deg, transparent 0 57%, rgba(255, 233, 174, 0.06) 61%, rgba(255, 243, 213, 0.13) 64%, rgba(255, 209, 113, 0.05) 68%, transparent 76%);
+    filter: blur(10px);
+    opacity: 0.95;
+    mix-blend-mode: screen;
+    pointer-events: none;
+}
+
+.upgrade-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 75% 18%, rgba(255, 241, 197, 0.18), transparent 22%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 45%);
+    pointer-events: none;
+}
+
+.upgrade-card > * {
+    position: relative;
+    z-index: 1;
+}
+
+.upgrade-card .card-number {
+    color: rgba(255, 224, 150, 0.82);
+}
+
+.upgrade-card h3 {
+    color: #fff7de;
+    text-shadow: 0 0 34px rgba(212, 166, 75, 0.26);
+}
+
+.payment-layout {
+    width: min(92%, 1180px);
+    margin: 18px auto 0;
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 18px;
+    align-items: stretch;
+}
+
+.payment-plan-card,
+.payment-form {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 34px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.045);
+    box-shadow: 0 28px 70px rgba(0, 0, 0, 0.28);
+}
+
+.payment-plan-card {
+    position: relative;
+    overflow: hidden;
+    border-color: rgba(214, 176, 96, 0.46);
+    background:
+        radial-gradient(ellipse at 82% 0%, rgba(255, 238, 184, 0.26), transparent 34%),
+        radial-gradient(ellipse at 34% -16%, rgba(255, 217, 128, 0.14), transparent 36%),
+        linear-gradient(180deg, rgba(52, 40, 16, 0.62), rgba(255, 255, 255, 0.045));
+}
+
+.payment-plan-card::before {
+    content: "";
+    position: absolute;
+    inset: -42% -20%;
+    background:
+        linear-gradient(106deg, transparent 0 34%, rgba(255, 226, 150, 0.09) 39%, rgba(255, 236, 180, 0.18) 43%, rgba(255, 226, 150, 0.06) 48%, transparent 57%),
+        linear-gradient(120deg, transparent 0 50%, rgba(255, 243, 207, 0.07) 54%, rgba(255, 232, 166, 0.14) 58%, rgba(255, 209, 113, 0.05) 63%, transparent 71%);
+    filter: blur(10px);
+    mix-blend-mode: screen;
+    pointer-events: none;
+}
+
+.payment-plan-card > * {
+    position: relative;
+    z-index: 1;
+}
+
+.payment-plan-card h3 {
+    margin: 70px 0 16px;
+    color: #ffffff;
+    font-size: clamp(3rem, 6vw, 6rem);
+    line-height: 0.9;
+    letter-spacing: -0.075em;
+}
+
+.payment-plan-card h3 span {
+    color: rgba(255, 255, 255, 0.46);
+    font-size: 1rem;
+    letter-spacing: 0;
+}
+
+.payment-plan-card p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.66);
+}
+
+.form-note {
+    margin: 4px 0 24px;
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.68);
+    font-size: 0.95rem;
+}
+
+.form-note strong {
+    color: #ffffff;
+}
+
+input[readonly] {
+    color: rgba(255, 255, 255, 0.68);
+    background: rgba(255, 255, 255, 0.035);
+}
+
 .recommendation-page-hero {
     padding-bottom: 18px;
 }
@@ -825,7 +963,8 @@ a {
     .dashboard-grid,
     .recommendation-list,
     .browse-list,
-    .details-grid {
+    .details-grid,
+    .payment-layout {
         grid-template-columns: 1fr;
     }
 
@@ -886,7 +1025,9 @@ a {
     .dashboard-card,
     .recommendation-card,
     .browse-card,
-    .empty-state-card {
+    .empty-state-card,
+    .payment-plan-card,
+    .payment-form {
         border-radius: 24px;
         padding: 26px;
     }

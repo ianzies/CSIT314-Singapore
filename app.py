@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, url_for, g
+from flask import Flask, render_template, render_template_string, request, redirect, session, url_for, g
 from werkzeug.security import generate_password_hash, check_password_hash
 from difflib import SequenceMatcher
 import sqlite3
@@ -172,6 +172,44 @@ def index():
     return render_template("index.html")
 
 
+# Helper function to render a message page with actions
+def render_message(title, message, primary_label=None, primary_endpoint=None, secondary_label=None, secondary_endpoint=None):
+    return render_template_string(
+        """
+        {% extends "base.html" %}
+
+        {% block content %}
+        <section class="dashboard-hero browse-page-hero">
+            <p class="eyebrow">Action Required</p>
+            <h1>{{ title }}</h1>
+            <p>{{ message }}</p>
+        </section>
+
+        <section class="empty-state-card action-message-card">
+            <h3>{{ title }}</h3>
+            <p>{{ message }}</p>
+
+            <div class="hero-actions">
+                {% if primary_label and primary_endpoint %}
+                    <a class="btn-primary" href="{{ url_for(primary_endpoint) }}">{{ primary_label }}</a>
+                {% endif %}
+
+                {% if secondary_label and secondary_endpoint %}
+                    <a class="btn-secondary" href="{{ url_for(secondary_endpoint) }}">{{ secondary_label }}</a>
+                {% endif %}
+            </div>
+        </section>
+        {% endblock %}
+        """,
+        title=title,
+        message=message,
+        primary_label=primary_label,
+        primary_endpoint=primary_endpoint,
+        secondary_label=secondary_label,
+        secondary_endpoint=secondary_endpoint
+    )
+
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if "user_id" in session:
@@ -184,7 +222,7 @@ def register():
         email = request.form["email"]
         password = request.form["password"]
         role = request.form["role"]
-        membership_status = request.form["membership_status"]
+        membership_status = "non_member"
 
         password_hash = generate_password_hash(password)
 
@@ -200,7 +238,14 @@ def register():
             )
             db.commit()
         except sqlite3.IntegrityError:
-            return "Email already registered."
+            return render_message(
+                "Email Already Registered",
+                "An account already exists with this email address. Try logging in instead.",
+                "Log In",
+                "login",
+                "Back to Register",
+                "register"
+            )
 
         return redirect(url_for("login"))
 
@@ -226,7 +271,14 @@ def login():
         ).fetchone()
 
         if user is None or not check_password_hash(user["password_hash"], password):
-            return "Invalid email or password."
+            return render_message(
+                "Login Failed",
+                "The email or password you entered is incorrect. Please try again.",
+                "Try Again",
+                "login",
+                "Register",
+                "register"
+            )
 
         session["user_id"] = user["user_id"]
         session["role"] = user["role"]
@@ -244,6 +296,79 @@ def login():
 def logout():
     session.clear()
     return redirect(url_for("index"))
+
+
+@app.route("/membership", methods=["GET", "POST"])
+def membership():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+        db = get_db()
+        user_id = session["user_id"]
+
+        db.execute(
+            "UPDATE users SET membership_status = ? WHERE user_id = ?",
+            ("member", user_id)
+        )
+        db.commit()
+
+        session["membership_status"] = "member"
+
+        if session.get("role") == "candidate":
+            return redirect(url_for("candidate_dashboard"))
+        elif session.get("role") == "employer":
+            return redirect(url_for("employer_dashboard"))
+
+        return redirect(url_for("index"))
+
+    return render_template_string(
+        """
+        {% extends "base.html" %}
+
+        {% block content %}
+        <section class="dashboard-hero browse-page-hero">
+            <p class="eyebrow">Membership Upgrade</p>
+            <h1>ALIGN Member</h1>
+            <p>Unlock unlimited ranked recommendations through this simulated payment portal.</p>
+        </section>
+
+        <section class="payment-layout">
+            <article class="payment-plan-card">
+                <span class="card-number">Member Plan</span>
+                <h3>$9.99 <span>/ month</span></h3>
+                <p>Demo payment only. No real payment is processed.</p>
+
+                <div class="chip-row">
+                    <span>Unlimited recommendations</span>
+                    <span>Member badge</span>
+                    <span>Expanded matching access</span>
+                </div>
+            </article>
+
+            <form class="payment-form" method="POST">
+                <label>Cardholder Name:</label><br>
+                <input type="text" value="John Smith" readonly><br><br>
+
+                <label>Card Number:</label><br>
+                <input type="text" value="6767 6767 6767 6767" readonly><br><br>
+
+                <label>Expiry:</label><br>
+                <input type="text" value="12/30" readonly><br><br>
+
+                <label>CVC:</label><br>
+                <input type="text" value="676" readonly><br><br>
+
+                <div class="form-note">
+                    This simulates payment confirmation for demonstration purposes.
+                </div>
+
+                <button type="submit">Activate Demo Membership</button>
+            </form>
+        </section>
+        {% endblock %}
+        """
+    )
 
 
 @app.route("/candidate/dashboard")
@@ -386,7 +511,14 @@ def create_job():
     ).fetchone()
 
     if company is None:
-        return "Please create a company profile before posting jobs."
+        return render_message(
+            "Company Profile Required",
+            "Create your company profile before posting jobs.",
+            "Create Company Profile",
+            "company_profile",
+            "Back to Dashboard",
+            "employer_dashboard"
+        )
 
     if request.method == "POST":
         job_title = request.form["job_title"]
@@ -618,7 +750,14 @@ def recommended_jobs():
     ).fetchone()
 
     if candidate is None:
-        return "Please create a candidate profile before viewing recommended jobs."
+        return render_message(
+            "Candidate Profile Required",
+            "Create your candidate profile before viewing recommended jobs.",
+            "Create Candidate Profile",
+            "candidate_profile",
+            "Back to Dashboard",
+            "candidate_dashboard"
+        )
 
     jobs = db.execute(
         """
@@ -660,7 +799,14 @@ def recommended_candidates():
     ).fetchone()
 
     if company is None:
-        return "Please create a company profile before viewing recommended candidates."
+        return render_message(
+            "Company Profile Required",
+            "Create your company profile before viewing recommended candidates.",
+            "Create Company Profile",
+            "company_profile",
+            "Back to Dashboard",
+            "employer_dashboard"
+        )
 
     jobs = db.execute(
         "SELECT * FROM jobs WHERE company_id = ?",
@@ -668,7 +814,14 @@ def recommended_candidates():
     ).fetchall()
 
     if not jobs:
-        return "Please create at least one job posting before viewing recommended candidates."
+        return render_message(
+            "Job Posting Required",
+            "Create at least one job posting before viewing recommended candidates.",
+            "Create Job Posting",
+            "create_job",
+            "Back to Dashboard",
+            "employer_dashboard"
+        )
 
     candidates = db.execute(
         """
