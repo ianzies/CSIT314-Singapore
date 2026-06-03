@@ -24,6 +24,7 @@ CREATE TABLE candidates (
     skills TEXT,
     preferred_work_mode TEXT,
     preferred_location TEXT,
+    resume_filename TEXT,
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 

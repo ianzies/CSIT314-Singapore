@@ -1,5 +1,6 @@
 from flask import Flask, render_template, render_template_string, request, redirect, session, url_for, g
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from difflib import SequenceMatcher
 import sqlite3
 import os
@@ -9,6 +10,8 @@ app = Flask(__name__)
 app.secret_key = "replace-this-with-a-secret-key"
 
 DATABASE = "database.db"
+UPLOAD_FOLDER = os.path.join("uploads", "resumes")
+ALLOWED_RESUME_EXTENSIONS = {"pdf", "doc", "docx"}
 
 
 def get_db():
@@ -23,6 +26,10 @@ def close_db(exception):
     db = g.pop("db", None)
     if db is not None:
         db.close()
+
+
+def allowed_resume_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_RESUME_EXTENSIONS
 
 
 def init_db():
@@ -403,6 +410,26 @@ def candidate_profile():
         skills = request.form["skills"]
         preferred_work_mode = request.form["preferred_work_mode"]
         preferred_location = request.form["preferred_location"]
+        resume_filename = profile["resume_filename"] if profile and "resume_filename" in profile.keys() else None
+
+        resume_file = request.files.get("resume")
+
+        if resume_file and resume_file.filename:
+            if not allowed_resume_file(resume_file.filename):
+                return render_message(
+                    "Invalid Resume File",
+                    "Please upload a resume as a PDF, DOC, or DOCX file.",
+                    "Back to Candidate Profile",
+                    "candidate_profile",
+                    "Back to Dashboard",
+                    "candidate_dashboard"
+                )
+
+            os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+            original_filename = secure_filename(resume_file.filename)
+            resume_filename = f"user_{user_id}_{original_filename}"
+            resume_path = os.path.join(UPLOAD_FOLDER, resume_filename)
+            resume_file.save(resume_path)
 
         if profile:
             db.execute(
@@ -410,13 +437,13 @@ def candidate_profile():
                 UPDATE candidates
                 SET full_name = ?, contact_info = ?, education = ?, major = ?,
                     years_experience = ?, work_experience = ?, skills = ?,
-                    preferred_work_mode = ?, preferred_location = ?
+                    preferred_work_mode = ?, preferred_location = ?, resume_filename = ?
                 WHERE user_id = ?
                 """,
                 (
                     full_name, contact_info, education, major,
                     years_experience, work_experience, skills,
-                    preferred_work_mode, preferred_location, user_id
+                    preferred_work_mode, preferred_location, resume_filename, user_id
                 )
             )
         else:
@@ -425,14 +452,14 @@ def candidate_profile():
                 INSERT INTO candidates (
                     user_id, full_name, contact_info, education, major,
                     years_experience, work_experience, skills,
-                    preferred_work_mode, preferred_location
+                    preferred_work_mode, preferred_location, resume_filename
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     user_id, full_name, contact_info, education, major,
                     years_experience, work_experience, skills,
-                    preferred_work_mode, preferred_location
+                    preferred_work_mode, preferred_location, resume_filename
                 )
             )
 
@@ -1199,6 +1226,8 @@ def recommended_candidates():
     return render_template("recommended_candidates.html", recommendations=recommendations)
 
 if __name__ == "__main__":
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
     if not os.path.exists(DATABASE):
         with app.app_context():
             init_db()

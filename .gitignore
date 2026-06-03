@@ -222,3 +222,14 @@ __marimo__/
 database.db
 __pycache__/
 *.pyc
+
+# Local uploaded resume files
+uploads/resumes/*
+!uploads/resumes/.gitkeep
+
+# macOS local files
+.DS_Store
+
+# Local database backups
+database_backup.db
+*.db-journal

@@ -864,6 +864,35 @@ a {
     color: #ffffff;
 }
 
+.uploaded-file-note {
+    margin-top: 14px;
+    margin-bottom: 0;
+}
+
+input[type="file"] {
+    padding: 14px 16px;
+    cursor: pointer;
+}
+
+input[type="file"]::file-selector-button {
+    margin-right: 14px;
+    padding: 10px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+input[type="file"]::file-selector-button:hover {
+    background: rgba(255, 255, 255, 0.14);
+}
+
 input[readonly] {
     color: rgba(255, 255, 255, 0.68);
     background: rgba(255, 255, 255, 0.035);

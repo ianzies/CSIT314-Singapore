@@ -7,7 +7,7 @@
     <p>Enter your profile details so employers can find and match with you.</p>
 </section>
 
-<form class="profile-form sectioned-form" method="POST">
+<form class="profile-form sectioned-form" method="POST" enctype="multipart/form-data">
     <section class="form-section">
         <div class="form-section-header">
             <span class="card-number">01</span>
@@ -120,6 +120,33 @@
             <div class="form-group">
                 <label>Preferred Location:</label>
                 <input type="text" name="preferred_location" value="{{ profile.preferred_location if profile else '' }}">
+            </div>
+        </div>
+    </section>
+
+    <section class="form-section">
+        <div class="form-section-header">
+            <span class="card-number">06</span>
+            <div>
+                <h3>Resume Upload</h3>
+                <p>Upload a resume file to support your candidate profile. Accepted formats: PDF, DOC, or DOCX.</p>
+            </div>
+        </div>
+
+        <div class="form-grid">
+            <div class="form-group full-width">
+                <label>Resume File:</label>
+                <input type="file" name="resume" accept=".pdf,.doc,.docx">
+
+                {% if profile and profile.resume_filename %}
+                    <p class="form-note uploaded-file-note">
+                        <strong>Current resume:</strong> {{ profile.resume_filename }}
+                    </p>
+                {% else %}
+                    <p class="form-note uploaded-file-note">
+                        No resume uploaded yet. You can still save your profile using the structured form fields.
+                    </p>
+                {% endif %}
             </div>
         </div>
     </section>
