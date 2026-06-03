@@ -9,6 +9,13 @@
 </section>
 
 <form class="search-form" method="GET" action="{{ url_for('candidate_list') }}">
+    <div class="form-section-header filter-header full-width">
+        <span class="card-number">Filters</span>
+        <div>
+            <h3>Search Filters</h3>
+            <p>Use skills, education, experience, location, and work preferences to narrow candidate profiles.</p>
+        </div>
+    </div>
     <div class="form-group full-width main-search-field">
         <label>Keyword:</label>
         <input type="text" name="keyword" placeholder="Broad search across candidate profile" value="{{ keyword }}">

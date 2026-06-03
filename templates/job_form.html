@@ -1,63 +1,133 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Create Job Posting</h2>
+<section class="dashboard-hero browse-page-hero">
+    <p class="eyebrow">Employer Job Posting</p>
+    <h1>Create Job Posting</h1>
+    <p>Enter job details so candidates can search and match with this role.</p>
+</section>
 
-<p>Enter job details so candidates can search and match with this role.</p>
+<form class="profile-form sectioned-form" method="POST">
+    <section class="form-section">
+        <div class="form-section-header">
+            <span class="card-number">01</span>
+            <div>
+                <h3>Role Details</h3>
+                <p>Describe the position and the type of employment being offered.</p>
+            </div>
+        </div>
 
-<form method="POST">
-    <label>Job Title:</label><br>
-    <input type="text" name="job_title" required><br><br>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Job Title:</label>
+                <input type="text" name="job_title" required>
+            </div>
 
-    <label>Job Description:</label><br>
-    <textarea name="job_description" rows="4"></textarea><br><br>
+            <div class="form-group">
+                <label>Job Type:</label>
+                <select name="job_type">
+                    <option value="Full-time">Full-time</option>
+                    <option value="Part-time">Part-time</option>
+                    <option value="Internship">Internship</option>
+                    <option value="Contract">Contract</option>
+                </select>
+            </div>
 
-    <label>Required Education Level:</label><br>
-    <select name="required_education" required>
-        <option value="">Select required education level</option>
-        <option value="Diploma">Diploma</option>
-        <option value="Bachelor">Bachelor</option>
-        <option value="Master">Master</option>
-        <option value="Doctorate">Doctorate</option>
-        <option value="Other">Other</option>
-    </select><br><br>
+            <div class="form-group full-width">
+                <label>Job Description:</label>
+                <textarea name="job_description" rows="4"></textarea>
+            </div>
+        </div>
+    </section>
 
-    <label>Required Skills:</label><br>
-    <textarea name="required_skills" rows="4" placeholder="Example: Python, SQL, machine learning"></textarea><br><br>
+    <section class="form-section">
+        <div class="form-section-header">
+            <span class="card-number">02</span>
+            <div>
+                <h3>Requirements</h3>
+                <p>Set the education, experience, and skill requirements used for matching.</p>
+            </div>
+        </div>
 
-    <label>Years of Experience Required:</label><br>
-    <input type="number" name="years_experience_required" min="0" value="0"><br><br>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Required Education Level:</label>
+                <select name="required_education" required>
+                    <option value="">Select required education level</option>
+                    <option value="Diploma">Diploma</option>
+                    <option value="Bachelor">Bachelor</option>
+                    <option value="Master">Master</option>
+                    <option value="Doctorate">Doctorate</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
 
-    <label>Work Mode:</label><br>
-    <select name="work_mode">
-        <option value="Remote">Remote</option>
-        <option value="Hybrid">Hybrid</option>
-        <option value="On-site">On-site</option>
-    </select><br><br>
+            <div class="form-group">
+                <label>Years of Experience Required:</label>
+                <input type="number" name="years_experience_required" min="0" value="0">
+            </div>
 
-    <label>Job Location:</label><br>
-    <input type="text" name="job_location"><br><br>
+            <div class="form-group full-width">
+                <label>Required Skills:</label>
+                <textarea name="required_skills" rows="4" placeholder="Example: Python, SQL, machine learning"></textarea>
+            </div>
+        </div>
+    </section>
 
-    <label>Annual Salary Range:</label><br>
-    <select name="salary_range" required>
-        <option value="">Select annual salary range</option>
-        <option value="$40,000 - $50,000">$40,000 - $50,000</option>
-        <option value="$50,000 - $60,000">$50,000 - $60,000</option>
-        <option value="$60,000 - $70,000">$60,000 - $70,000</option>
-        <option value="$70,000 - $80,000">$70,000 - $80,000</option>
-        <option value="$80,000 - $100,000">$80,000 - $100,000</option>
-        <option value="$100,000 - $120,000">$100,000 - $120,000</option>
-        <option value="$120,000+">$120,000+</option>
-    </select><br><br>
+    <section class="form-section">
+        <div class="form-section-header">
+            <span class="card-number">03</span>
+            <div>
+                <h3>Work Setup</h3>
+                <p>Define where and how the role will be performed.</p>
+            </div>
+        </div>
 
-    <label>Job Type:</label><br>
-    <select name="job_type">
-        <option value="Full-time">Full-time</option>
-        <option value="Part-time">Part-time</option>
-        <option value="Internship">Internship</option>
-        <option value="Contract">Contract</option>
-    </select><br><br>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Work Mode:</label>
+                <select name="work_mode">
+                    <option value="Remote">Remote</option>
+                    <option value="Hybrid">Hybrid</option>
+                    <option value="On-site">On-site</option>
+                </select>
+            </div>
 
-    <button type="submit">Create Job Posting</button>
+            <div class="form-group">
+                <label>Job Location:</label>
+                <input type="text" name="job_location">
+            </div>
+        </div>
+    </section>
+
+    <section class="form-section">
+        <div class="form-section-header">
+            <span class="card-number">04</span>
+            <div>
+                <h3>Compensation</h3>
+                <p>Select the annual salary range shown to candidates.</p>
+            </div>
+        </div>
+
+        <div class="form-grid">
+            <div class="form-group full-width">
+                <label>Annual Salary Range:</label>
+                <select name="salary_range" required>
+                    <option value="">Select annual salary range</option>
+                    <option value="$40,000 - $50,000">$40,000 - $50,000</option>
+                    <option value="$50,000 - $60,000">$50,000 - $60,000</option>
+                    <option value="$60,000 - $70,000">$60,000 - $70,000</option>
+                    <option value="$70,000 - $80,000">$70,000 - $80,000</option>
+                    <option value="$80,000 - $100,000">$80,000 - $100,000</option>
+                    <option value="$100,000 - $120,000">$100,000 - $120,000</option>
+                    <option value="$120,000+">$120,000+</option>
+                </select>
+            </div>
+        </div>
+    </section>
+
+    <div class="form-actions">
+        <button type="submit">Create Job Posting</button>
+    </div>
 </form>
 {% endblock %}

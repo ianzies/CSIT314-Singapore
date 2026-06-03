@@ -1,23 +1,59 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Company Profile</h2>
+<section class="dashboard-hero browse-page-hero">
+    <p class="eyebrow">Employer Profile</p>
+    <h1>Company Profile</h1>
+    <p>Enter your company details so candidates can understand your organisation.</p>
+</section>
 
-<p>Enter your company details so candidates can understand your organisation.</p>
+<form class="profile-form sectioned-form" method="POST">
+    <section class="form-section">
+        <div class="form-section-header">
+            <span class="card-number">01</span>
+            <div>
+                <h3>Company Details</h3>
+                <p>Provide the core information candidates will see when viewing your company.</p>
+            </div>
+        </div>
 
-<form method="POST">
-    <label>Company Name:</label><br>
-    <input type="text" name="company_name" value="{{ company.company_name if company else '' }}" required><br><br>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Company Name:</label>
+                <input type="text" name="company_name" value="{{ company.company_name if company else '' }}" required>
+            </div>
 
-    <label>Company Description:</label><br>
-    <textarea name="company_description" rows="4">{{ company.company_description if company else '' }}</textarea><br><br>
+            <div class="form-group">
+                <label>Industry:</label>
+                <input type="text" name="industry" value="{{ company.industry if company else '' }}">
+            </div>
 
-    <label>Industry:</label><br>
-    <input type="text" name="industry" value="{{ company.industry if company else '' }}"><br><br>
+            <div class="form-group full-width">
+                <label>Location:</label>
+                <input type="text" name="location" value="{{ company.location if company else '' }}">
+            </div>
+        </div>
+    </section>
 
-    <label>Location:</label><br>
-    <input type="text" name="location" value="{{ company.location if company else '' }}"><br><br>
+    <section class="form-section">
+        <div class="form-section-header">
+            <span class="card-number">02</span>
+            <div>
+                <h3>Company Overview</h3>
+                <p>Describe your organisation so candidates can understand the workplace and culture.</p>
+            </div>
+        </div>
 
-    <button type="submit">Save Company Profile</button>
+        <div class="form-grid">
+            <div class="form-group full-width">
+                <label>Company Description:</label>
+                <textarea name="company_description" rows="5">{{ company.company_description if company else '' }}</textarea>
+            </div>
+        </div>
+    </section>
+
+    <div class="form-actions">
+        <button type="submit">Save Company Profile</button>
+    </div>
 </form>
 {% endblock %}

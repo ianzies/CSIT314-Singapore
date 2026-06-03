@@ -553,6 +553,343 @@ def create_job():
     return render_template("job_form.html")
 
 
+# Employer job management routes
+@app.route("/jobs/manage")
+def manage_jobs():
+    if session.get("role") != "employer":
+        return redirect(url_for("login"))
+
+    db = get_db()
+    user_id = session["user_id"]
+
+    company = db.execute(
+        "SELECT * FROM companies WHERE user_id = ?",
+        (user_id,)
+    ).fetchone()
+
+    if company is None:
+        return render_message(
+            "Company Profile Required",
+            "Create your company profile before managing job listings.",
+            "Create Company Profile",
+            "company_profile",
+            "Back to Dashboard",
+            "employer_dashboard"
+        )
+
+    jobs = db.execute(
+        """
+        SELECT jobs.*, companies.company_name
+        FROM jobs
+        JOIN companies ON jobs.company_id = companies.company_id
+        WHERE jobs.company_id = ?
+        ORDER BY jobs.job_id DESC
+        """,
+        (company["company_id"],)
+    ).fetchall()
+
+    return render_template_string(
+        """
+        {% extends "base.html" %}
+
+        {% block content %}
+        <section class="dashboard-hero browse-page-hero">
+            <p class="eyebrow">Employer Job Management</p>
+            <h1>Manage Job Listings</h1>
+            <p>Edit or remove job listings created by your company.</p>
+        </section>
+
+        {% if jobs %}
+            <section class="browse-list">
+                {% for job in jobs %}
+                    <article class="browse-card">
+                        <div class="recommendation-topline">
+                            <span class="card-number">Job {{ loop.index }}</span>
+                            <span class="match-pill">{{ job.job_type }}</span>
+                        </div>
+
+                        <div class="recommendation-main">
+                            <h3>{{ job.job_title }}</h3>
+                            <p class="recommendation-subtitle">
+                                {{ job.company_name }} · {{ job.job_location }}
+                            </p>
+                        </div>
+
+                        <div class="chip-row">
+                            <span>{{ job.work_mode }}</span>
+                            <span>{{ job.salary_range }}</span>
+                            <span>{{ job.required_education }}</span>
+                            <span>{{ job.years_experience_required }} years</span>
+                        </div>
+
+                        <p class="recommendation-summary">
+                            {{ job.job_description }}
+                        </p>
+
+                        <div class="management-actions">
+                            <a class="btn-secondary" href="{{ url_for('edit_job', job_id=job.job_id) }}">Edit</a>
+
+                            <form class="inline-delete-form" method="POST" action="{{ url_for('delete_job', job_id=job.job_id) }}" onsubmit="return confirm('Delete this job listing? This action cannot be undone.');">
+                                <button class="btn-danger" type="submit">Delete</button>
+                            </form>
+                        </div>
+                    </article>
+                {% endfor %}
+            </section>
+        {% else %}
+            <section class="empty-state-card">
+                <h3>No job listings yet.</h3>
+                <p>Create your first job posting before managing listings.</p>
+                <div class="hero-actions">
+                    <a class="btn-primary" href="{{ url_for('create_job') }}">Create Job Posting</a>
+                    <a class="btn-secondary" href="{{ url_for('employer_dashboard') }}">Back to Dashboard</a>
+                </div>
+            </section>
+        {% endif %}
+        {% endblock %}
+        """,
+        jobs=jobs
+    )
+
+
+@app.route("/jobs/edit/<int:job_id>", methods=["GET", "POST"])
+def edit_job(job_id):
+    if session.get("role") != "employer":
+        return redirect(url_for("login"))
+
+    db = get_db()
+    user_id = session["user_id"]
+
+    company = db.execute(
+        "SELECT * FROM companies WHERE user_id = ?",
+        (user_id,)
+    ).fetchone()
+
+    if company is None:
+        return render_message(
+            "Company Profile Required",
+            "Create your company profile before editing job listings.",
+            "Create Company Profile",
+            "company_profile",
+            "Back to Dashboard",
+            "employer_dashboard"
+        )
+
+    job = db.execute(
+        "SELECT * FROM jobs WHERE job_id = ? AND company_id = ?",
+        (job_id, company["company_id"])
+    ).fetchone()
+
+    if job is None:
+        return render_message(
+            "Job Listing Not Found",
+            "This job listing does not exist or does not belong to your company.",
+            "Manage Job Listings",
+            "manage_jobs",
+            "Back to Dashboard",
+            "employer_dashboard"
+        )
+
+    if request.method == "POST":
+        job_title = request.form["job_title"]
+        job_description = request.form["job_description"]
+        required_education = request.form["required_education"]
+        required_skills = request.form["required_skills"]
+        years_experience_required = request.form["years_experience_required"]
+        work_mode = request.form["work_mode"]
+        job_location = request.form["job_location"]
+        salary_range = request.form["salary_range"]
+        job_type = request.form["job_type"]
+
+        db.execute(
+            """
+            UPDATE jobs
+            SET job_title = ?, job_description = ?, required_education = ?,
+                required_skills = ?, years_experience_required = ?, work_mode = ?,
+                job_location = ?, salary_range = ?, job_type = ?
+            WHERE job_id = ? AND company_id = ?
+            """,
+            (
+                job_title, job_description, required_education,
+                required_skills, years_experience_required, work_mode,
+                job_location, salary_range, job_type,
+                job_id, company["company_id"]
+            )
+        )
+        db.commit()
+        return redirect(url_for("manage_jobs"))
+
+    return render_template_string(
+        """
+        {% extends "base.html" %}
+
+        {% block content %}
+        <section class="dashboard-hero browse-page-hero">
+            <p class="eyebrow">Employer Job Management</p>
+            <h1>Edit Job Listing</h1>
+            <p>Update this job listing so candidates see accurate role information.</p>
+        </section>
+
+        <form class="profile-form sectioned-form" method="POST">
+            <section class="form-section">
+                <div class="form-section-header">
+                    <span class="card-number">01</span>
+                    <div>
+                        <h3>Role Details</h3>
+                        <p>Update the position title, description, and employment type.</p>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Job Title:</label>
+                        <input type="text" name="job_title" value="{{ job.job_title }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Job Type:</label>
+                        <select name="job_type">
+                            <option value="Full-time" {% if job.job_type == "Full-time" %}selected{% endif %}>Full-time</option>
+                            <option value="Part-time" {% if job.job_type == "Part-time" %}selected{% endif %}>Part-time</option>
+                            <option value="Internship" {% if job.job_type == "Internship" %}selected{% endif %}>Internship</option>
+                            <option value="Contract" {% if job.job_type == "Contract" %}selected{% endif %}>Contract</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Job Description:</label>
+                        <textarea name="job_description" rows="4">{{ job.job_description }}</textarea>
+                    </div>
+                </div>
+            </section>
+
+            <section class="form-section">
+                <div class="form-section-header">
+                    <span class="card-number">02</span>
+                    <div>
+                        <h3>Requirements</h3>
+                        <p>Update the matching requirements for this role.</p>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Required Education Level:</label>
+                        <select name="required_education" required>
+                            <option value="Diploma" {% if job.required_education == "Diploma" %}selected{% endif %}>Diploma</option>
+                            <option value="Bachelor" {% if job.required_education == "Bachelor" %}selected{% endif %}>Bachelor</option>
+                            <option value="Master" {% if job.required_education == "Master" %}selected{% endif %}>Master</option>
+                            <option value="Doctorate" {% if job.required_education == "Doctorate" %}selected{% endif %}>Doctorate</option>
+                            <option value="Other" {% if job.required_education == "Other" %}selected{% endif %}>Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Years of Experience Required:</label>
+                        <input type="number" name="years_experience_required" min="0" value="{{ job.years_experience_required }}">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Required Skills:</label>
+                        <textarea name="required_skills" rows="4">{{ job.required_skills }}</textarea>
+                    </div>
+                </div>
+            </section>
+
+            <section class="form-section">
+                <div class="form-section-header">
+                    <span class="card-number">03</span>
+                    <div>
+                        <h3>Work Setup</h3>
+                        <p>Update the work mode and location for this listing.</p>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Work Mode:</label>
+                        <select name="work_mode">
+                            <option value="Remote" {% if job.work_mode == "Remote" %}selected{% endif %}>Remote</option>
+                            <option value="Hybrid" {% if job.work_mode == "Hybrid" %}selected{% endif %}>Hybrid</option>
+                            <option value="On-site" {% if job.work_mode == "On-site" %}selected{% endif %}>On-site</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Job Location:</label>
+                        <input type="text" name="job_location" value="{{ job.job_location }}">
+                    </div>
+                </div>
+            </section>
+
+            <section class="form-section">
+                <div class="form-section-header">
+                    <span class="card-number">04</span>
+                    <div>
+                        <h3>Compensation</h3>
+                        <p>Update the annual salary range shown to candidates.</p>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label>Annual Salary Range:</label>
+                        <select name="salary_range" required>
+                            <option value="$40,000 - $50,000" {% if job.salary_range == "$40,000 - $50,000" %}selected{% endif %}>$40,000 - $50,000</option>
+                            <option value="$50,000 - $60,000" {% if job.salary_range == "$50,000 - $60,000" %}selected{% endif %}>$50,000 - $60,000</option>
+                            <option value="$60,000 - $70,000" {% if job.salary_range == "$60,000 - $70,000" %}selected{% endif %}>$60,000 - $70,000</option>
+                            <option value="$70,000 - $80,000" {% if job.salary_range == "$70,000 - $80,000" %}selected{% endif %}>$70,000 - $80,000</option>
+                            <option value="$80,000 - $100,000" {% if job.salary_range == "$80,000 - $100,000" %}selected{% endif %}>$80,000 - $100,000</option>
+                            <option value="$100,000 - $120,000" {% if job.salary_range == "$100,000 - $120,000" %}selected{% endif %}>$100,000 - $120,000</option>
+                            <option value="$120,000+" {% if job.salary_range == "$120,000+" %}selected{% endif %}>$120,000+</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <div class="form-actions split-actions">
+                <a class="btn-secondary" href="{{ url_for('manage_jobs') }}">Cancel</a>
+                <button type="submit">Save Changes</button>
+            </div>
+        </form>
+        {% endblock %}
+        """,
+        job=job
+    )
+
+
+@app.route("/jobs/delete/<int:job_id>", methods=["POST"])
+def delete_job(job_id):
+    if session.get("role") != "employer":
+        return redirect(url_for("login"))
+
+    db = get_db()
+    user_id = session["user_id"]
+
+    company = db.execute(
+        "SELECT * FROM companies WHERE user_id = ?",
+        (user_id,)
+    ).fetchone()
+
+    if company is None:
+        return render_message(
+            "Company Profile Required",
+            "Create your company profile before deleting job listings.",
+            "Create Company Profile",
+            "company_profile",
+            "Back to Dashboard",
+            "employer_dashboard"
+        )
+
+    db.execute(
+        "DELETE FROM jobs WHERE job_id = ? AND company_id = ?",
+        (job_id, company["company_id"])
+    )
+    db.commit()
+
+    return redirect(url_for("manage_jobs"))
+
+
 # Job listing route for candidates
 @app.route("/jobs")
 def job_list():

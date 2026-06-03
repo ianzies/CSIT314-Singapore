@@ -36,14 +36,20 @@
         <p>Create job postings with role requirements, salary range, work mode, and job type.</p>
     </a>
 
-    <a class="dashboard-card" href="{{ url_for('candidate_list') }}">
+    <a class="dashboard-card" href="{{ url_for('manage_jobs') }}">
         <span class="card-number">03</span>
+        <h3>Manage Job Listings</h3>
+        <p>Edit or remove job postings created by your company.</p>
+    </a>
+
+    <a class="dashboard-card" href="{{ url_for('candidate_list') }}">
+        <span class="card-number">04</span>
         <h3>Search Candidates</h3>
         <p>Browse candidate profiles using filters for skills, education, experience, location, and work mode.</p>
     </a>
 
     <a class="dashboard-card" href="{{ url_for('recommended_candidates') }}">
-        <span class="card-number">04</span>
+        <span class="card-number">05</span>
         <h3>Recommendations</h3>
         <p>View ranked candidate matches based on your hiring requirements.</p>
     </a>

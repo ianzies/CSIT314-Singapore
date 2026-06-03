@@ -196,9 +196,10 @@ form {
     max-width: 560px;
     margin-top: 36px;
     padding: 38px;
-    background: rgba(255, 255, 255, 0.045);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.028));
     border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 22px;
+    border-radius: 28px;
     box-shadow: 0 28px 80px rgba(0, 0, 0, 0.45);
     backdrop-filter: blur(16px);
 }
@@ -208,6 +209,71 @@ form {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 24px 28px;
+}
+
+form.profile-form,
+form.sectioned-form,
+form.profile-form.sectioned-form {
+    width: min(92%, 980px);
+    max-width: 980px;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+}
+
+.form-section {
+    padding: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 30px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.028));
+    box-shadow: 0 28px 70px rgba(0, 0, 0, 0.28);
+}
+
+.form-section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    margin-bottom: 26px;
+}
+
+.form-section-header h3 {
+    margin: 0;
+    color: #ffffff;
+    font-size: clamp(1.45rem, 2.2vw, 2.2rem);
+    line-height: 1;
+    letter-spacing: -0.045em;
+}
+
+.form-section-header p {
+    margin: 10px 0 0;
+    color: rgba(255, 255, 255, 0.58);
+    font-size: 0.98rem;
+}
+
+.filter-header {
+    margin-bottom: 2px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px 24px;
+}
+
+.form-actions {
+    width: min(100%, 360px);
+    margin-left: auto;
+    margin-top: 4px;
 }
 
 .form-group {
@@ -226,10 +292,11 @@ form {
 }
 
 label {
-    color: #e7e7e7;
-    font-weight: 600;
-    font-size: 0.9rem;
-    letter-spacing: 0.03em;
+    color: rgba(255, 255, 255, 0.78);
+    font-weight: 800;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
 }
 
 input,
@@ -237,21 +304,62 @@ select,
 textarea {
     width: 100%;
     margin-top: 6px;
-    padding: 14px 16px;
-    background: #101010;
+    padding: 16px 18px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.025)),
+        #0d0d0d;
     color: #f4f4f4;
-    border: 1px solid #3a3a3a;
-    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 16px;
     outline: none;
-    min-height: 52px;
+    min-height: 58px;
     font: inherit;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 14px 38px rgba(0, 0, 0, 0.18);
+    transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+    border-color: rgba(255, 255, 255, 0.25);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03)),
+        #0f0f0f;
 }
 
 input:focus,
 select:focus,
 textarea:focus {
-    border-color: #ffffff;
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.72);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.07),
+        0 0 0 4px rgba(255, 255, 255, 0.09),
+        0 18px 48px rgba(0, 0, 0, 0.28);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.035)),
+        #111111;
+}
+
+select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 18px;
+    cursor: pointer;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.025)),
+        #0d0d0d;
+}
+
+select option {
+    background: #111111;
+    color: #ffffff;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: rgba(255, 255, 255, 0.42);
 }
 
 button {
@@ -371,6 +479,62 @@ a {
     color: #ffffff;
     background: transparent;
     border: 1px solid rgba(255, 255, 255, 0.24);
+}
+
+.btn-danger {
+    width: auto;
+    min-height: 48px;
+    padding: 0 22px;
+    color: #ffffff;
+    background: rgba(255, 80, 80, 0.12);
+    border: 1px solid rgba(255, 110, 110, 0.42);
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    box-shadow: none;
+}
+
+.btn-danger:hover {
+    background: rgba(255, 80, 80, 0.2);
+    transform: translateY(-1px);
+}
+
+.management-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 24px;
+    padding-top: 22px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.inline-delete-form {
+    width: auto;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+}
+
+.split-actions {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.split-actions .btn-secondary,
+.split-actions button {
+    width: auto;
 }
 
 .rounded-panel {
@@ -964,7 +1128,8 @@ input[readonly] {
     .recommendation-list,
     .browse-list,
     .details-grid,
-    .payment-layout {
+    .payment-layout,
+    .form-grid {
         grid-template-columns: 1fr;
     }
 
@@ -1027,8 +1192,33 @@ input[readonly] {
     .browse-card,
     .empty-state-card,
     .payment-plan-card,
-    .payment-form {
+    .payment-form,
+    .form-section {
         border-radius: 24px;
         padding: 26px;
+    }
+
+    .form-section-header {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .form-actions {
+        width: 100%;
+    }
+
+    .management-actions,
+    .split-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .management-actions .btn-secondary,
+    .management-actions .btn-danger,
+    .inline-delete-form,
+    .inline-delete-form button,
+    .split-actions .btn-secondary,
+    .split-actions button {
+        width: 100%;
     }
 }

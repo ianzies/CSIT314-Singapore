@@ -1,49 +1,131 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Candidate Profile</h2>
+<section class="dashboard-hero browse-page-hero">
+    <p class="eyebrow">Candidate Profile</p>
+    <h1>Candidate Profile</h1>
+    <p>Enter your profile details so employers can find and match with you.</p>
+</section>
 
-<p>Enter your profile details so employers can find and match with you.</p>
+<form class="profile-form sectioned-form" method="POST">
+    <section class="form-section">
+        <div class="form-section-header">
+            <span class="card-number">01</span>
+            <div>
+                <h3>Personal Details</h3>
+                <p>Basic information employers can use to identify and contact you.</p>
+            </div>
+        </div>
 
-<form method="POST">
-    <label>Full Name:</label><br>
-    <input type="text" name="full_name" value="{{ profile.full_name if profile else '' }}" required><br><br>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Full Name:</label>
+                <input type="text" name="full_name" value="{{ profile.full_name if profile else '' }}" required>
+            </div>
 
-    <label>Contact Information:</label><br>
-    <input type="text" name="contact_info" value="{{ profile.contact_info if profile else '' }}"><br><br>
+            <div class="form-group">
+                <label>Contact Information:</label>
+                <input type="text" name="contact_info" value="{{ profile.contact_info if profile else '' }}">
+            </div>
+        </div>
+    </section>
 
-    <label>Education Level:</label><br>
-    <select name="education" required>
-        <option value="">Select education level</option>
-        <option value="Diploma" {% if profile and profile.education == "Diploma" %}selected{% endif %}>Diploma</option>
-        <option value="Bachelor" {% if profile and profile.education == "Bachelor" %}selected{% endif %}>Bachelor</option>
-        <option value="Master" {% if profile and profile.education == "Master" %}selected{% endif %}>Master</option>
-        <option value="Doctorate" {% if profile and profile.education == "Doctorate" %}selected{% endif %}>Doctorate</option>
-        <option value="Other" {% if profile and profile.education == "Other" %}selected{% endif %}>Other</option>
-    </select><br><br>
+    <section class="form-section">
+        <div class="form-section-header">
+            <span class="card-number">02</span>
+            <div>
+                <h3>Education</h3>
+                <p>Describe your qualification level and study background.</p>
+            </div>
+        </div>
 
-    <label>Major / Field of Study:</label><br>
-    <input type="text" name="major" value="{{ profile.major if profile else '' }}"><br><br>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Education Level:</label>
+                <select name="education" required>
+                    <option value="">Select education level</option>
+                    <option value="Diploma" {% if profile and profile.education == "Diploma" %}selected{% endif %}>Diploma</option>
+                    <option value="Bachelor" {% if profile and profile.education == "Bachelor" %}selected{% endif %}>Bachelor</option>
+                    <option value="Master" {% if profile and profile.education == "Master" %}selected{% endif %}>Master</option>
+                    <option value="Doctorate" {% if profile and profile.education == "Doctorate" %}selected{% endif %}>Doctorate</option>
+                    <option value="Other" {% if profile and profile.education == "Other" %}selected{% endif %}>Other</option>
+                </select>
+            </div>
 
-    <label>Years of Experience:</label><br>
-    <input type="number" name="years_experience" min="0" value="{{ profile.years_experience if profile else 0 }}"><br><br>
+            <div class="form-group">
+                <label>Major / Field of Study:</label>
+                <input type="text" name="major" value="{{ profile.major if profile else '' }}">
+            </div>
+        </div>
+    </section>
 
-    <label>Work Experience:</label><br>
-    <textarea name="work_experience" rows="4">{{ profile.work_experience if profile else '' }}</textarea><br><br>
+    <section class="form-section">
+        <div class="form-section-header">
+            <span class="card-number">03</span>
+            <div>
+                <h3>Experience</h3>
+                <p>Summarise your work history and relevant professional experience.</p>
+            </div>
+        </div>
 
-    <label>Skills:</label><br>
-    <textarea name="skills" rows="4" placeholder="Example: Python, SQL, cybersecurity, communication">{{ profile.skills if profile else '' }}</textarea><br><br>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Years of Experience:</label>
+                <input type="number" name="years_experience" min="0" value="{{ profile.years_experience if profile else 0 }}">
+            </div>
 
-    <label>Preferred Working Mode:</label><br>
-    <select name="preferred_work_mode">
-        <option value="Remote" {% if profile and profile.preferred_work_mode == "Remote" %}selected{% endif %}>Remote</option>
-        <option value="Hybrid" {% if profile and profile.preferred_work_mode == "Hybrid" %}selected{% endif %}>Hybrid</option>
-        <option value="On-site" {% if profile and profile.preferred_work_mode == "On-site" %}selected{% endif %}>On-site</option>
-    </select><br><br>
+            <div class="form-group full-width">
+                <label>Work Experience:</label>
+                <textarea name="work_experience" rows="4">{{ profile.work_experience if profile else '' }}</textarea>
+            </div>
+        </div>
+    </section>
 
-    <label>Preferred Location:</label><br>
-    <input type="text" name="preferred_location" value="{{ profile.preferred_location if profile else '' }}"><br><br>
+    <section class="form-section">
+        <div class="form-section-header">
+            <span class="card-number">04</span>
+            <div>
+                <h3>Skills</h3>
+                <p>Add technical, professional, and communication skills that support matching.</p>
+            </div>
+        </div>
 
-    <button type="submit">Save Profile</button>
+        <div class="form-grid">
+            <div class="form-group full-width">
+                <label>Skills:</label>
+                <textarea name="skills" rows="4" placeholder="Example: Python, SQL, cybersecurity, communication">{{ profile.skills if profile else '' }}</textarea>
+            </div>
+        </div>
+    </section>
+
+    <section class="form-section">
+        <div class="form-section-header">
+            <span class="card-number">05</span>
+            <div>
+                <h3>Preferences</h3>
+                <p>Set your preferred working mode and location for job recommendations.</p>
+            </div>
+        </div>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Preferred Working Mode:</label>
+                <select name="preferred_work_mode">
+                    <option value="Remote" {% if profile and profile.preferred_work_mode == "Remote" %}selected{% endif %}>Remote</option>
+                    <option value="Hybrid" {% if profile and profile.preferred_work_mode == "Hybrid" %}selected{% endif %}>Hybrid</option>
+                    <option value="On-site" {% if profile and profile.preferred_work_mode == "On-site" %}selected{% endif %}>On-site</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Preferred Location:</label>
+                <input type="text" name="preferred_location" value="{{ profile.preferred_location if profile else '' }}">
+            </div>
+        </div>
+    </section>
+
+    <div class="form-actions">
+        <button type="submit">Save Profile</button>
+    </div>
 </form>
 {% endblock %}
