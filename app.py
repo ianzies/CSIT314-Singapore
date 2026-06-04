@@ -518,7 +518,7 @@ def membership():
         <section class="payment-layout">
             <article class="payment-plan-card">
                 <span class="card-number">Member Plan</span>
-                <h3>$9.99 <span>/ month</span></h3>
+                <h3>$67.67 <span>/ month</span></h3>
                 <p>Demo payment only. No real payment is processed.</p>
 
                 <div class="chip-row">
@@ -530,7 +530,7 @@ def membership():
 
             <form class="payment-form" method="POST">
                 <label>Cardholder Name:</label><br>
-                <input type="text" value="John Smith" readonly><br><br>
+                <input type="text" value="USER" readonly><br><br>
 
                 <label>Card Number:</label><br>
                 <input type="text" value="6767 6767 6767 6767" readonly><br><br>
